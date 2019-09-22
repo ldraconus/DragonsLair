@@ -23,6 +23,10 @@ public class Message extends JDialog {
     int dialogType = Nothing;
     static int button = Nothing;
 
+    public int getButton() {
+        return button;
+    }
+
     public Message(int type, String msg) {
         setContentPane(contentPane);
 
@@ -116,6 +120,8 @@ public class Message extends JDialog {
                 }
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.pack();
+        this.setVisible(true);
     }
 
     private void onButton1() {
