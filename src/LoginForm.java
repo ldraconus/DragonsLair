@@ -11,27 +11,28 @@ public class LoginForm {
     private JButton signInButton;
     private JButton cancelButton;
 
-    static JFrame frame = null;
+    private static JFrame frame = null;
+    private DB db = null;
+
+    public DB getDB() { return db; }
 
     private boolean Login() {
-        // return DB.Login(usernameField.getText(), passwordField.getText());
-        return false;
+        return db.Login(usernameField.getText(), passwordField.getPassword());
     }
 
-    public void DoLogin() {
+    private void DoLogin() {
         if (!Login()) {
             frame.setVisible(false);
             Message msg = new Message(Message.OKMessage, "Username or Password is incorrect");
-            msg.pack();
-            msg.setVisible(true);
             frame.setVisible(true);
         }
         else {
+            frame.setVisible(false);
             //    show main form
         }
     }
 
-    public LoginForm() {
+    private LoginForm() {
         signInButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -58,9 +59,11 @@ public class LoginForm {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+        db = new DB();
     }
 
     public static void main(String[] args) {
+//        Message msg = new Message(Message.OKMessage, System.getProperty("java.class.path"));
         frame = new JFrame("Dragon's Lair Login");
         frame.setContentPane(new LoginForm().LoginPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
