@@ -1,3 +1,5 @@
+import org.jetbrains.annotations.NotNull;
+
 import java.sql.*;
 import java.util.Arrays;
 
@@ -34,10 +36,9 @@ public class DB {
                                                      "name varchar(40) not null, " +
                                                      "password char(40) not null, " +
                                                      "store varchar(128), " +
-                                                     "admin char(1), " +
                                                      "primary key(id))");
-            ExecuteStatement("insert into user (name, password, admin) " +
-                                              "values ('admin', sha('admin'), 'Y')");
+            ExecuteStatement("insert into user (name, password) " +
+                                              "values ('admin', sha('admin'))");
         }
 
         void InitializeStore(String store) {
@@ -98,7 +99,7 @@ public class DB {
         Init(defaultHost);
     }
 
-    public boolean Login(String username, char[] password) {
+    public boolean Login(String username, @NotNull char[] password) {
         String pass = "";
         for (Character c: password) pass += c;
         return db.Login(username, pass);

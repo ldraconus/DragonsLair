@@ -12,13 +12,8 @@ public class LoginForm {
     private JButton cancelButton;
 
     private static JFrame frame = null;
-    private DB db = null;
 
-    public DB getDB() { return db; }
-
-    private boolean Login() {
-        return db.Login(usernameField.getText(), passwordField.getPassword());
-    }
+    private boolean Login() { return Data.DB().Login(usernameField.getText(), passwordField.getPassword()); }
 
     private void DoLogin() {
         if (!Login()) {
@@ -28,7 +23,8 @@ public class LoginForm {
         }
         else {
             frame.setVisible(false);
-            //    show main form
+            Data.User(usernameField.getText());
+            MainForm.Display();
         }
     }
 
@@ -58,8 +54,6 @@ public class LoginForm {
                 DoLogin();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        db = new DB();
     }
 
     public static void main(String[] args) {
@@ -68,6 +62,7 @@ public class LoginForm {
         frame.setContentPane(new LoginForm().LoginPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 }
