@@ -1,7 +1,7 @@
 import javax.swing.*;
 import java.awt.event.*;
 
-public class AddStore extends JDialog {
+public class EditStore extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -12,9 +12,10 @@ public class AddStore extends JDialog {
     public static boolean isOk() { return ok; }
     public static String getStore() { return store; }
 
-    public AddStore() {
+    public EditStore(String origName) {
         setContentPane(contentPane);
         setModal(true);
+        nameTextField.setText(origName);
         getRootPane().setDefaultButton(buttonOK);
 
         buttonOK.addActionListener(new ActionListener() {

@@ -115,16 +115,28 @@ public class ManageStoresForm {
     }
 
     private void Edit() {
-        // Display filled out EditStore dialog
+        boolean selected = !storeList.isSelectionEmpty();
+        if (!selected) return;
+        String origStore = storeList.getSelectedValue();
+        EditStore edit = new EditStore(origStore);
+        if (EditStore.isOk()) {
+            String store = EditStore.getStore();
+            if (store.equals(origStore)) return;
+            if (store.isEmpty()) return;
+            if (Data.DB().StoreExists(store)) return;
+            Data.DB().RenameStore(origStore, store);
+            UpdateList();
+            SetContext();
+        }
     }
 
     private void Add() {
         AddStore add = new AddStore();
-        if (add.isOk()) {
-            String name = add.getStore();
-            if (name.isEmpty()) return;
-            if (Data.DB().StoreExists(name)) return;
-            Data.DB().AddStore(name);
+        if (AddStore.isOk()) {
+            String store = AddStore.getStore();
+            if (store.isEmpty()) return;
+            if (Data.DB().StoreExists(store)) return;
+            Data.DB().AddStore(store);
             UpdateList();
             SetContext();
         }

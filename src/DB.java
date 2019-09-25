@@ -178,6 +178,10 @@ public class DB {
         db.ExecuteData("delete from admin.store where admin.store.name = ?", store);
     }
 
+    public void RenameStore(String orig, String name) {
+        db.ExecuteData("update admin.store set admin.store.name = ? where admin.store.name = ?", name, orig);
+    }
+
     public Vector<String> GetUsers() {
         Vector<String> users = new Vector<>();
         ResultSet data = db.ExecutePrepared("select name from admin.user");
