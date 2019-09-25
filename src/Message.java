@@ -120,6 +120,7 @@ public class Message extends JDialog {
                 }
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
     }
