@@ -139,6 +139,15 @@ public class DB {
         return stores;
     }
 
+    public boolean StoreInUse(String store) {
+        ResultSet data = db.ExecutePrepared("select store.id " +
+                                                 "from store, user " +
+                                                 "where store.name = ? and user.store = store.id", store);
+        try { return data != null && data.next(); }
+        catch (Exception e) { System.out.println(e); }
+        return false;
+    }
+
     public Vector<String> GetUsers() {
         Vector<String> users = new Vector<>();
         ResultSet data = db.ExecutePrepared("select name from admin.user");

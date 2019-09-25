@@ -85,10 +85,15 @@ public class ManageStoresForm {
     }
 
     private void SetContext() {
-        boolean flag = !storeList.isSelectionEmpty();
+        boolean selected = !storeList.isSelectionEmpty();
+        boolean deleteable = true;
+        if (selected) {
+            String store = storeList.getSelectedValue();
+            deleteable = !Data.DB().StoreInUse(store);
+        }
         int numStores = storeList.getModel().getSize();
-        editButton.setEnabled(flag);
-        deleteButton.setEnabled(flag && numStores > 1);
+        editButton.setEnabled(selected);
+        deleteButton.setEnabled(selected && numStores > 1 && deleteable);
     }
 
     private void Done() {
