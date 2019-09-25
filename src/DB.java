@@ -45,6 +45,7 @@ public class DB {
         }
 
         void InitializeStores() {
+            ExecuteStatement("use admin");
             ExecuteStatement("create table admin.store (id integer not null auto_increment, " +
                                                             "name varchar(128), " +
                                                             "primary key(id))");
@@ -71,6 +72,18 @@ public class DB {
             }
             catch (Exception e) { System.out.println(e); }
             return null;
+        }
+
+        boolean ExecuteData(String sql, String...p) {
+            try {
+                if (prep != null) prep.close();
+                prep = connection.prepareStatement(sql);
+                int i = 1;
+                for (String x: p) prep.setString(i++, x);
+                return prep.execute();
+            }
+            catch (Exception e) { System.out.println(e); }
+            return false;
         }
 
         private boolean DBExists(String name) {
@@ -140,12 +153,29 @@ public class DB {
     }
 
     public boolean StoreInUse(String store) {
-        ResultSet data = db.ExecutePrepared("select store.id " +
-                                                 "from store, user " +
-                                                 "where store.name = ? and user.store = store.id", store);
+        ResultSet data = db.ExecutePrepared("select admin.store.id " +
+                                                 "from admin.store, admin.user " +
+                                                 "where admin.store.name = ? and admin.user.store = admin.store.id", store);
         try { return data != null && data.next(); }
         catch (Exception e) { System.out.println(e); }
         return false;
+    }
+
+    public boolean StoreExists(String store) {
+        ResultSet data = db.ExecutePrepared("select id " +
+                                                 "from admin.store " +
+                                                 "where name = ?", store);
+        try { return data != null && data.next(); }
+        catch (Exception e) { System.out.println(e); }
+        return false;
+    }
+
+    public void AddStore(String store) {
+        db.ExecuteData("insert into admin.store (name) values(?)", store);
+    }
+
+    public void DeleteStore(String store) {
+        db.ExecuteData("delete from admin.store where admin.store.name = ?", store);
     }
 
     public Vector<String> GetUsers() {

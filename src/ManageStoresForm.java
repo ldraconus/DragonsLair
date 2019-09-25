@@ -73,13 +73,17 @@ public class ManageStoresForm {
         SetContext();
     }
 
-    private void Open() {
+    private void UpdateList() {
         storeList.clearSelection();
-        storeList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         Vector<String> stores = Data.DB().GetStores();
         DefaultListModel<String> data = new DefaultListModel<String>();
         for (String s: stores) data.addElement(s);
         storeList.setModel(data);
+    }
+
+    private void Open() {
+        storeList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        UpdateList();
         SetContext();
         frame.setVisible(true);
     }
@@ -101,7 +105,13 @@ public class ManageStoresForm {
     }
 
     private void Delete() {
-        // remove selected index
+        boolean selected = !storeList.isSelectionEmpty();
+        if (selected) {
+            String store = storeList.getSelectedValue();
+            Data.DB().DeleteStore(store);
+            UpdateList();
+            SetContext();
+        }
     }
 
     private void Edit() {
@@ -109,6 +119,14 @@ public class ManageStoresForm {
     }
 
     private void Add() {
-        // Display Empty AddStore dialog
+        AddStore add = new AddStore();
+        if (add.isOk()) {
+            String name = add.getStore();
+            if (name.isEmpty()) return;
+            if (Data.DB().StoreExists(name)) return;
+            Data.DB().AddStore(name);
+            UpdateList();
+            SetContext();
+        }
     }
 }
