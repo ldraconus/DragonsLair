@@ -13,6 +13,11 @@ public class LoginForm {
 
     private static JFrame frame = null;
 
+    public static JFrame Frame() { return frame; }
+    public static void Dispose() { // dispose sub windows
+        if (frame != null) frame.dispose();
+    }
+
     private boolean Login() { return Data.DB().Login(usernameField.getText(), passwordField.getPassword()); }
 
     private void DoLogin() {
@@ -54,6 +59,11 @@ public class LoginForm {
                 DoLogin();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    public static boolean CloseYesNo() {
+        Message msg = new Message(Message.YesNoMessage, "Do you really want to close the application?");
+        return msg.getButton() == msg.YesButton;
     }
 
     public static void main(String[] args) {
