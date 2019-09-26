@@ -10,6 +10,7 @@ public class PrefsForm {
     private JButton doneButton;
 
     private static JFrame frame;
+    public static PrefsForm prefsForm = null;
 
     public static JFrame Frame() { return frame; }
     public static void Dispose() { // dispose sub window
@@ -30,6 +31,7 @@ public class PrefsForm {
     }
 
     public PrefsForm() {
+        prefsForm = this;
         PrefsPanel.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Done();
@@ -39,6 +41,10 @@ public class PrefsForm {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent we) { Done(); }
+        });
+
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowOpened(WindowEvent we) { Open(); }
         });
 
         manageStoresButton.addActionListener(new ActionListener() {
@@ -53,6 +59,18 @@ public class PrefsForm {
             @Override
             public void actionPerformed(ActionEvent actionEvent) { Done(); }
         });
+    }
+
+    private void Open() {
+        SetContext();
+    }
+
+    public static void setContext() {
+        prefsForm.SetContext();
+    }
+
+    private void SetContext() {
+        manageLoginsButton.setEnabled(Data.DB().GetStores().size() != 0);
     }
 
     private void ManageLogins() {

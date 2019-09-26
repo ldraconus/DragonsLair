@@ -1,27 +1,31 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.Vector;
 
 public class MainForm {
     private JPanel MainPanel;
     private JButton manageCustomersButton;
     private JButton manageItemsButton;
-    private JComboBox storeComboBox;
+    private JComboBox<String> storeComboBox;
     private JButton importCSVButton;
     private JButton printReportsButton;
     private JButton editPreferencesButton;
 
+    private static MainForm mainForm = null;
     private static JFrame frame = null;
 
     public static void Display() {
         frame = new JFrame("Dragon's Lair Pull-list Actions");
         frame.setContentPane(new MainForm().MainPanel);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        mainForm.SetContext();
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
     
     public MainForm() {
+        mainForm = this;
         MainPanel.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
@@ -79,15 +83,15 @@ public class MainForm {
         importCSVButton.setEnabled(flag);
         printReportsButton.setEnabled(flag);
         editPreferencesButton.setEnabled(true);
-        // get a vector of stores from the DB
-        // set the combo box to this value, if any
-        // set the default value of the combo box to the users default
-        // set the default store in the Data
+        Vector<String> stores = Data.DB().GetStores();
+        DefaultComboBoxModel<String> data = new DefaultComboBoxModel<String>();
+        for (String s : stores) data.addElement(s);
+        storeComboBox.setModel(data);
+        if (!Data.Store().isEmpty()) storeComboBox.setSelectedItem(Data.Store());
     }
 
     private void StorePicked() {
-        // get which store was selected
-        // set the default store in the data
+        Data.Store((String) storeComboBox.getSelectedItem());
     }
 
     private void EditPreferences() {

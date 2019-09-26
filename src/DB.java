@@ -182,6 +182,19 @@ public class DB {
         db.ExecuteData("update admin.store set admin.store.name = ? where admin.store.name = ?", name, orig);
     }
 
+    public int GetStoreId(String store) {
+        ResultSet data = db.ExecutePrepared("select id from admin.store where admin.store.name = ?", store);
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    return data.getInt("id");
+                }
+            }
+        }
+        catch (Exception e) { System.out.println(e); }
+        return -1;
+    }
+
     public Vector<String> GetUsers() {
         Vector<String> users = new Vector<>();
         ResultSet data = db.ExecutePrepared("select name from admin.user");
@@ -198,4 +211,43 @@ public class DB {
         return users;
     }
 
+    public boolean UserExists(String user) {
+        ResultSet data = db.ExecutePrepared("select id " +
+                "from admin.user " +
+                "where name = ?", user);
+        try { return data != null && data.next(); }
+        catch (Exception e) { System.out.println(e); }
+        return false;
+    }
+
+    public void AddUser(String user, String password, String store) {
+        int id = GetStoreId(store);
+        db.ExecuteData("insert into admin.user (name, password, store) values(?, sha(?), ?)",
+                       user, password, Integer.toString(id));
+    }
+
+    public void DeleteUser(String user) {
+        db.ExecuteData("delete from admin.user where admin.user.name = ?", user);
+    }
+
+    public void UpdateUser(String orig, String name, String password, String store) {
+        int id = GetStoreId(store);
+        if (password.isEmpty()) db.ExecuteData("update admin.user set admin.user.name = ?, admin.user.store = ? " +
+                "where admin.user.name = ?", name, Integer.toString(id), orig);
+        else db.ExecuteData("update admin.user set admin.user.name = ?, admin.user.password = sha(?), admin.user.store = ? " +
+                                              "where admin.user.name = ?", name, password, Integer.toString(id), orig);
+    }
+
+    public String GetUserStore(String user) {
+        ResultSet r = db.ExecutePrepared("select store.name from admin.user, admin.store " +
+                                                                "where admin.user.name = ? " +
+                                                                  "and admin.user.store = admin.store.id", user);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("store.name");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
 }
