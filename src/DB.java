@@ -250,4 +250,20 @@ public class DB {
         catch (Exception e) { System.out.println(e); }
         return "";
     }
+
+    public Vector<String> GetCustomers() {
+        Vector<String> customers = new Vector<>();
+        ResultSet data = db.ExecutePrepared("select name from ?.customers", Data.Store());
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    customers.add(data.getString("name"));
+                }
+            }
+        }
+        catch(Exception e) { System.out.println(e); }
+
+        return customers;
+    }
 }

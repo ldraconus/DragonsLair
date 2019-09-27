@@ -43,6 +43,7 @@ public class MainForm {
                     frame.dispose();
                     LoginForm.Dispose();
                     PrefsForm.Dispose();
+                    ManageCustomersForm.Dispose();
                 }
             }
         });
@@ -108,5 +109,6 @@ public class MainForm {
     }
 
     private void ManageCustomers() {
+        ManageCustomersForm.Display();
     }
 }
