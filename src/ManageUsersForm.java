@@ -92,19 +92,54 @@ public class ManageUsersForm {
         deleteButton.setEnabled(flag && numUsers > 1);
     }
 
+    private void UpdateList() {
+        userList.clearSelection();
+        Vector<String> users = Data.DB().GetUsers();
+        DefaultListModel<String> data = new DefaultListModel<String>();
+        for (String u: users) data.addElement(u);
+        userList.setModel(data);
+    }
+
     private void Done() {
         frame.setVisible(false);
     }
 
     private void Delete() {
-        // remove selected index
+        boolean selected = !userList.isSelectionEmpty();
+        if (selected) {
+            String user = userList.getSelectedValue();
+            Data.DB().DeleteUser(user);
+            UpdateList();
+            SetContext();
+        }
     }
 
     private void Edit() {
-        // Display filled out EditUser dialog
+        String user = userList.getSelectedValue();
+        String store = Data.DB().GetUserStore(user);
+        AddUser add = new AddUser(user, store);
+        if (AddUser.isOk()) {
+            String name = AddUser.getUser();
+            String password = AddUser.getPassword();
+            store = AddUser.getStore();
+            if (store.isEmpty() || user.isEmpty()) return;
+            Data.DB().UpdateUser(user, name, password, store);
+            UpdateList();
+            SetContext();
+        }
     }
 
     private void Add() {
-        // Display Empty AddUser dialog
+        AddUser add = new AddUser();
+        if (AddUser.isOk()) {
+            String user = AddUser.getUser();
+            String password = AddUser.getPassword();
+            String store = AddUser.getStore();
+            if (store.isEmpty() || password.isEmpty() || user.isEmpty()) return;
+            if (Data.DB().UserExists(user)) return;
+            Data.DB().AddUser(user, password, store);
+            UpdateList();
+            SetContext();
+        }
     }
 }

@@ -29,6 +29,7 @@ public class LoginForm {
         else {
             frame.setVisible(false);
             Data.User(usernameField.getText());
+            Data.Store(Data.DB().GetUserStore(Data.User()));
             MainForm.Display();
         }
     }

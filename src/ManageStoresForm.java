@@ -98,6 +98,7 @@ public class ManageStoresForm {
         int numStores = storeList.getModel().getSize();
         editButton.setEnabled(selected);
         deleteButton.setEnabled(selected && numStores > 1 && deleteable);
+        PrefsForm.setContext();
     }
 
     private void Done() {
