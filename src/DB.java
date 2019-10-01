@@ -63,7 +63,7 @@ public class DB {
         	ExecuteStatement("create table item(item_id integer not null auto_increment, " +
         											"item varchar(300) not null, " + 
         											"diamond integer, " +
-        											"primary key(id))")
+        											"primary key(id))");
         }
         
         void createPullListTable() {
