@@ -50,14 +50,44 @@ public class DB {
                                                             "name varchar(128), " +
                                                             "primary key(id))");
         }
+        
+        void createCustomerTable() {
+        	ExecuteStatement("create table customer(customer_id integer not null auto_increment, " + 
+        												"name varchar(40) not null, " +
+        												"phone varchar(20), " + 
+        												"email varchar(100), " + 
+        												"primary key(id))");
+        }
+        
+        void createItemTable() {
+        	ExecuteStatement("create table item(item_id integer not null auto_increment, " +
+        											"item varchar(300) not null, " + 
+        											"diamond integer, " +
+        											"primary key(id))")
+        }
+        
+        void createPullListTable() {
+        	ExecuteStatement("create table pull_list(pull_id integer not null auto_increment, " +
+        											"customer_id integer, " +
+        											"item_id integer, " +
+        											"issue integer, " +
+        											"allVariants boolean, " +
+        											"quantity integer, " +
+        											"isGraphic boolean, " +
+        											"primary key(id), " +
+        											"foreign key (customer_id) references customer(customer_id), "
+        											"foreign key (item_id) references item(item_id)");
+        }
 
         void InitializeStore(String store) {
             ExecutePrepared("create database ?", store);
             ExecutePrepared("use ?", store);
             // create customer table
+            createCustomerTable();
             // create item table
-            // create customer_item table
+            createItemTable();
             // create pull_list table
+            createPullListTable();
         }
 
         PreparedStatement prep = null;
