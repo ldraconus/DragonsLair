@@ -4,6 +4,7 @@ This branch contains all of the code we believe works up to this point. When fin
 
 Currently built to be run directly from IntelliJ. Running from command line or a different IDE will likely result in errors.
 It also requires a version of MySQL to be running on the machine being used for testing, and the password for the database to changed on or around line 15 of DB.java. This will eventually be changed to be a more elegant solution.
+Default login is username-'admin' password-'admin'.
 
 
 Contributors: Chris, Mason, Kevin, Brandon, Stephen
