@@ -1,8 +1,10 @@
-import org.jetbrains.annotations.NotNull;
+//import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.Arrays;
 import java.util.Vector;
+
+import com.sun.istack.internal.NotNull;
 
 public class DB {
 
@@ -12,7 +14,8 @@ public class DB {
         Connection(String host) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "v4d3r@Laptop");
+                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
+                //connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "v4d3r@Laptop");
                 if (!DBExists("admin")) InitializeDB();
                 if (!TableExists("admin", "store")) InitializeStores();
             } catch (Exception e) { System.out.println(e); }
@@ -56,14 +59,14 @@ public class DB {
         												"name varchar(40) not null, " +
         												"phone varchar(20), " + 
         												"email varchar(100), " + 
-        												"primary key(id))");
+        												"primary key(customer_id))");
         }
         
         void createItemTable() {
         	ExecuteStatement("create table item(item_id integer not null auto_increment, " +
         											"item varchar(300) not null, " + 
         											"diamond integer, " +
-        											"primary key(id))");
+        											"primary key(item_id))");
         }
         
         void createPullListTable() {
@@ -74,10 +77,47 @@ public class DB {
         											"allVariants boolean, " +
         											"quantity integer, " +
         											"isGraphic boolean, " +
-        											"primary key(id), " +
-        											"foreign key (customer_id) references customer(customer_id), "
-        											"foreign key (item_id) references item(item_id)");
+        											"primary key(pull_id), " +
+        											"foreign key (customer_id) references customer(customer_id), "+
+        											"foreign key (item_id) references item(item_id))");
         }
+
+        void createCustomerItemTable(){
+            ExecuteStatement("create table customerItem(customerItem_id integer not null auto_increment, " +
+                                                "wants integer, " +
+                                                "got integer, " +
+                                                "primary key(customerItem_id), " +
+                                                "foreign key(wants) references item(item_id), " +
+                                                "foreign key(got) references item(item_id))");
+        }
+
+        void createPullDateTable(){
+            ExecuteStatement("create table pullDate(pullDate_id integer not null auto_increment, " +
+                                                "pull_id integer, " +
+                                                "date date, " +
+                                                "primary key(pullDate_id), " +
+                                                "foreign key (pull_id) references pull_list(pull_id))");
+        }
+        void createPullItemTable(){
+            ExecuteStatement("create table pullItem(pullItem_id integer not null auto_increment, " +
+                                                "item_id integer, " +
+                                                "pull_id integer, " +
+                                                "primary key(pullItem_id), " +
+                                                "foreign key(item_id) references pull_list(item_id), " +
+                                                "foreign key(pull_id) references pull_list(pull_id))");
+        }
+
+        void createQuantityTable(){
+            ExecuteStatement("create table quantity(quantity_id integer not null auto_increment, " +
+                                                "customer_id integer, " +
+                                                "pull_id integer, " +
+                                                "quantity integer, " +
+                                                "primary key(quantity_id), " +
+                                                "foreign key(customer_id) references pull_list(customer_id), " +
+                                                "foreign key(pull_id) references pull_list(pull_id))");
+        }
+
+
 
         void InitializeStore(String store) {
             ExecutePrepared("create database ?", store);
@@ -88,6 +128,14 @@ public class DB {
             createItemTable();
             // create pull_list table
             createPullListTable();
+            //create customerItem table
+            createCustomerItemTable();
+            //create pullDate table
+            createPullDateTable();
+            //create pullItem table
+            createPullItemTable();
+            //create quantity table
+            createQuantityTable();
         }
 
         PreparedStatement prep = null;
