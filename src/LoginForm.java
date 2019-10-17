@@ -18,6 +18,15 @@ public class LoginForm {
         if (frame != null) frame.dispose();
     }
 
+    public static void Display() {
+        frame = new JFrame("Dragon's Lair Login");
+        frame.setContentPane(new LoginForm().LoginPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
     private boolean Login() { return Data.DB().Login(usernameField.getText(), passwordField.getPassword()); }
 
     private void DoLogin() {
@@ -68,12 +77,6 @@ public class LoginForm {
     }
 
     public static void main(String[] args) {
-//        Message msg = new Message(Message.OKMessage, System.getProperty("java.class.path"));
-        frame = new JFrame("Dragon's Lair Login");
-        frame.setContentPane(new LoginForm().LoginPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        Display();
     }
 }
