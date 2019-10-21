@@ -1,10 +1,12 @@
 //import org.jetbrains.annotations.NotNull;
 
-import java.sql.*;
-import java.util.Arrays;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Vector;
 
-import com.sun.istack.internal.NotNull;
+//import com.sun.istack.internal.NotNull;
 
 public class DB {
 
@@ -208,7 +210,7 @@ public class DB {
         Init(defaultHost);
     }
 
-    public boolean Login(String username, @NotNull char[] password) {
+    public boolean Login(String username, char[] password) {
         String pass = "";
         for (Character c: password) pass += c;
         return db.Login(username, pass);
@@ -343,5 +345,53 @@ public class DB {
         catch(Exception e) { System.out.println(e); }
 
         return customers;
+    }
+
+    public boolean CustomerExists(String store, String customer) {
+        ResultSet data = db.ExecutePrepared("select id " +
+                "from ?.customer " +
+                "where name = ?", store, customer);
+        try { return data != null && data.next(); }
+        catch (Exception e) { System.out.println(e); }
+        return false;
+    }
+
+    public void AddCustomer(String store, String name, String email, String phone) {
+        db.ExecuteData("insert into ?.customer (name, email, phone) values(?, ?, ?)",
+                store, name, email, phone);
+    }
+
+    public String GetCustomerEMail(String store, String name) {
+        ResultSet r = db.ExecutePrepared("select customer.email from ?.customer " +
+                "where customer.name = ? ", store, name);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("customer.email");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    public String GetCustomerPhone(String store, String name) {
+        ResultSet r = db.ExecutePrepared("select customer.phone from ?.customer " +
+                "where customer.name = ? ", store, name);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("customer.phone");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    public void UpdateCustomer(String store, String origCustomer, String customer, String email, String phone) {
+        db.ExecuteData("update ?.customer set name=?, email=?, phone=? where name=?",
+                store, customer, email, phone, origCustomer);
+    }
+
+    public void DeleteCustomer(String store, String origCustomer) {
+        db.ExecuteData("delete from ?.customer where name=?",
+                store, origCustomer);
     }
 }
