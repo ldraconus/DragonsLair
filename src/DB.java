@@ -16,8 +16,8 @@ public class DB {
         Connection(String host) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
-                //connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "v4d3r@Laptop");
+                //connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
+                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "v4d3r@Laptop");
                 if (!DBExists("admin")) InitializeDB();
                 if (!TableExists("admin", "store")) InitializeStores();
             } catch (Exception e) { System.out.println(e); }
@@ -57,86 +57,79 @@ public class DB {
         }
         
         void createCustomerTable() {
-        	ExecuteStatement("create table customer(customer_id integer not null auto_increment, " + 
+        	ExecuteStatement("create table customer(id integer not null auto_increment, " +
         												"name varchar(40) not null, " +
         												"phone varchar(20), " + 
         												"email varchar(100), " + 
-        												"primary key(customer_id))");
+        												"primary key(id))");
         }
         
         void createItemTable() {
-        	ExecuteStatement("create table item(item_id integer not null auto_increment, " +
+        	ExecuteStatement("create table item(id integer not null auto_increment, " +
         											"item varchar(300) not null, " + 
-        											"diamond integer, " +
-        											"primary key(item_id))");
+        											"primary key(id))");
         }
         
         void createPullListTable() {
-        	ExecuteStatement("create table pull_list(pull_id integer not null auto_increment, " +
+        	ExecuteStatement("create table pull_list(id integer not null auto_increment, " +
         											"customer_id integer, " +
         											"item_id integer, " +
         											"issue integer, " +
         											"allVariants boolean, " +
         											"quantity integer, " +
         											"isGraphic boolean, " +
-        											"primary key(pull_id), " +
-        											"foreign key (customer_id) references customer(customer_id), "+
-        											"foreign key (item_id) references item(item_id))");
+        											"primary key(id), " +
+        											"foreign key (customer_id) references customer(id), "+
+        											"foreign key (item_id) references item(id))");
         }
 
-        void createCustomerItemTable(){
-            ExecuteStatement("create table customerItem(customerItem_id integer not null auto_increment, " +
+        void createItemMapTable(){
+            ExecuteStatement("create table ItemMap(id integer not null auto_increment, " +
                                                 "wants integer, " +
                                                 "got integer, " +
-                                                "primary key(customerItem_id), " +
-                                                "foreign key(wants) references item(item_id), " +
-                                                "foreign key(got) references item(item_id))");
+                                                "primary key(id), " +
+                                                "foreign key(wants) references item(id), " +
+                                                "foreign key(got) references item(id))");
+        }
+
+        void createPullItemTable(){
+            ExecuteStatement("create table pullItem(id integer not null auto_increment, " +
+                    "item_id integer, " +
+                    "pull_id integer, " +
+                    "primary key(id), " +
+                    "foreign key(item_id) references item(id), " +
+                    "foreign key(pull_id) references pull_list(id))");
         }
 
         void createPullDateTable(){
-            ExecuteStatement("create table pullDate(pullDate_id integer not null auto_increment, " +
+            ExecuteStatement("create table pullDate(id integer not null auto_increment, " +
                                                 "pull_id integer, " +
                                                 "date date, " +
-                                                "primary key(pullDate_id), " +
-                                                "foreign key (pull_id) references pull_list(pull_id))");
-        }
-        void createPullItemTable(){
-            ExecuteStatement("create table pullItem(pullItem_id integer not null auto_increment, " +
-                                                "item_id integer, " +
-                                                "pull_id integer, " +
-                                                "primary key(pullItem_id), " +
-                                                "foreign key(item_id) references pull_list(item_id), " +
-                                                "foreign key(pull_id) references pull_list(pull_id))");
+                                                "primary key(id), " +
+                                                "foreign key (pull_id) references pull_list(id))");
         }
 
         void createQuantityTable(){
-            ExecuteStatement("create table quantity(quantity_id integer not null auto_increment, " +
+            ExecuteStatement("create table quantity(id integer not null auto_increment, " +
                                                 "customer_id integer, " +
                                                 "pull_id integer, " +
                                                 "quantity integer, " +
-                                                "primary key(quantity_id), " +
-                                                "foreign key(customer_id) references pull_list(customer_id), " +
-                                                "foreign key(pull_id) references pull_list(pull_id))");
+                                                "primary key(id), " +
+                                                "foreign key(customer_id) references customer(id), " +
+                                                "foreign key(pull_id) references pull_list(id))");
         }
 
 
 
         void InitializeStore(String store) {
-            ExecutePrepared("create database ?", store);
-            ExecutePrepared("use ?", store);
-            // create customer table
+            ExecuteStatement("create database " + store);
+            ExecuteStatement("use " + store);
             createCustomerTable();
-            // create item table
             createItemTable();
-            // create pull_list table
             createPullListTable();
-            //create customerItem table
-            createCustomerItemTable();
-            //create pullDate table
+            createItemMapTable();
             createPullDateTable();
-            //create pullItem table
             createPullItemTable();
-            //create quantity table
             createQuantityTable();
         }
 
@@ -252,6 +245,7 @@ public class DB {
 
     public void AddStore(String store) {
         db.ExecuteData("insert into admin.store (name) values(?)", store);
+        db.InitializeStore(store);
     }
 
     public void DeleteStore(String store) {
@@ -333,7 +327,8 @@ public class DB {
 
     public Vector<String> GetCustomers() {
         Vector<String> customers = new Vector<>();
-        ResultSet data = db.ExecutePrepared("select name from ?.customers", Data.Store());
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select name from customers");
 
         try {
             if (data != null) {
@@ -348,22 +343,25 @@ public class DB {
     }
 
     public boolean CustomerExists(String store, String customer) {
+        db.ExecuteStatement("use " + store);
         ResultSet data = db.ExecutePrepared("select id " +
-                "from ?.customer " +
-                "where name = ?", store, customer);
+                "from customer " +
+                "where name = ?", customer);
         try { return data != null && data.next(); }
         catch (Exception e) { System.out.println(e); }
         return false;
     }
 
     public void AddCustomer(String store, String name, String email, String phone) {
-        db.ExecuteData("insert into ?.customer (name, email, phone) values(?, ?, ?)",
-                store, name, email, phone);
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into customer (name, email, phone) values(?, ?, ?)",
+                name, email, phone);
     }
 
     public String GetCustomerEMail(String store, String name) {
-        ResultSet r = db.ExecutePrepared("select customer.email from ?.customer " +
-                "where customer.name = ? ", store, name);
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select customer.email from customer " +
+                "where customer.name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -374,8 +372,9 @@ public class DB {
     }
 
     public String GetCustomerPhone(String store, String name) {
+        db.ExecuteStatement("use " + store);
         ResultSet r = db.ExecutePrepared("select customer.phone from ?.customer " +
-                "where customer.name = ? ", store, name);
+                "where customer.name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -386,12 +385,14 @@ public class DB {
     }
 
     public void UpdateCustomer(String store, String origCustomer, String customer, String email, String phone) {
-        db.ExecuteData("update ?.customer set name=?, email=?, phone=? where name=?",
-                store, customer, email, phone, origCustomer);
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("update customer set name=?, email=?, phone=? where name=?",
+                customer, email, phone, origCustomer);
     }
 
     public void DeleteCustomer(String store, String origCustomer) {
-        db.ExecuteData("delete from ?.customer where name=?",
-                store, origCustomer);
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("delete from customer where name=?",
+                origCustomer);
     }
 }
