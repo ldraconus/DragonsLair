@@ -65,8 +65,10 @@ public class DB {
         }
         
         void createItemTable() {
+            ExecuteStatement("use admin");
         	ExecuteStatement("create table item(id integer not null auto_increment, " +
-        											"item varchar(300) not null, " + 
+        											"item varchar(300) not null, " +
+                                                    "diamond varchar(100), " +
         											"primary key(id))");
         }
         
