@@ -10,6 +10,7 @@ public class MainForm {
     private JButton importCSVButton;
     private JButton printReportsButton;
     private JButton editPreferencesButton;
+    private JButton logout;
 
     private static MainForm mainForm = null;
     private static JFrame frame = null;
@@ -74,6 +75,11 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent actionEvent) { EditPreferences(); }
         });
+
+        logout.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) { LogOut(); }
+        });
     }
 
     private void SetContext() {
@@ -84,6 +90,7 @@ public class MainForm {
         importCSVButton.setEnabled(flag);
         printReportsButton.setEnabled(flag);
         editPreferencesButton.setEnabled(true);
+        logout.setEnabled(true);
         Vector<String> stores = Data.DB().GetStores();
         DefaultComboBoxModel<String> data = new DefaultComboBoxModel<String>();
         for (String s : stores) data.addElement(s);
@@ -109,5 +116,13 @@ public class MainForm {
 
     private void ManageCustomers() {
         ManageCustomersForm.Display();
+    }
+
+    private void LogOut(){
+        frame.dispose();
+        LoginForm.Dispose();
+        PrefsForm.Dispose();
+        ManageCustomersForm.Dispose();
+        LoginForm.Display();
     }
 }

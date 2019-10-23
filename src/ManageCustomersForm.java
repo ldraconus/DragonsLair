@@ -123,15 +123,47 @@ public class ManageCustomersForm {
     }
 
     private void Add() {
-
+        new AddCustomer();
+        if (AddCustomer.isOk()) {
+            String name = AddCustomer.Name();
+            if (Data.DB().CustomerExists(Data.Store(), name)) return;
+            String email = AddCustomer.EMail();
+            String phone = AddCustomer.Phone();
+            Data.DB().AddCustomer(Data.Store(), name, email, phone);
+            searchTextField.setText("");
+            customers = Data.DB().GetCustomers();
+            SetCustomerList(customers);
+            SetContext();
+        }
     }
 
     private void Edit() {
-
+        boolean selected = !customerList.isSelectionEmpty();
+        if (!selected) return;
+        String origCustomer = customerList.getSelectedValue();
+        String email = Data.DB().GetCustomerEMail(Data.Store(), origCustomer);
+        String phone = Data.DB().GetCustomerPhone(Data.Store(), origCustomer);
+        new EditCustomer(origCustomer, email, phone);
+        if (EditCustomer.isOk()) {
+            String customer = EditCustomer.Name();
+            if (customer.equals(origCustomer)) return;
+            if (customer.isEmpty()) return;
+            if (Data.DB().CustomerExists(Data.Store(), customer)) return;
+            Data.DB().UpdateCustomer(Data.Store(), origCustomer, customer, email, phone);
+            searchTextField.setText("");
+            customers = Data.DB().GetCustomers();
+            SetCustomerList(customers);
+            SetContext();
+        }
     }
 
     private void Delete() {
-
+        boolean selected = !customerList.isSelectionEmpty();
+        if (!selected) return;
+        String origCustomer = customerList.getSelectedValue();
+        Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + origCustomer + "?");
+        if (msg.getButton() == Message.NoButton) return;
+        Data.DB().DeleteCustomer(Data.Store(), origCustomer);
     }
 
     private void Done() {
