@@ -8,14 +8,14 @@ import com.sun.istack.internal.NotNull;
 
 public class DB {
 
+
     private class Connection {
         private java.sql.Connection connection = null;
 
         Connection(String host) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
-                //connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "v4d3r@Laptop");
+                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "password");
                 if (!DBExists("admin")) InitializeDB();
                 if (!TableExists("admin", "store")) InitializeStores();
             } catch (Exception e) { System.out.println(e); }
@@ -65,7 +65,7 @@ public class DB {
         void createItemTable() {
         	ExecuteStatement("create table item(item_id integer not null auto_increment, " +
         											"item varchar(300) not null, " + 
-        											"diamond integer, " +
+        											"diamond varchar(100), " +
         											"primary key(item_id))");
         }
         
@@ -212,6 +212,10 @@ public class DB {
         String pass = "";
         for (Character c: password) pass += c;
         return db.Login(username, pass);
+    }
+
+    public void insertItemTable(String itemName, String diamondCode){
+        db.ExecuteData("insert into item(item,diamond) values(?,?))", itemName, diamondCode);
     }
 
     public Vector<String> GetStores() {

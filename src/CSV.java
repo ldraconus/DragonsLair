@@ -18,6 +18,9 @@ public class CSV
     File csvFile;
     BufferedReader reader = null;
 
+    //DB database = new DB();
+
+
     private static Scanner input = new Scanner(System.in);
 
     public void getInfo() {
@@ -82,6 +85,7 @@ public class CSV
                 if (length > 4) {
                     System.out.printf("Diamond Number: %s\tName: %-60.60s", fullLine[1], fullLine[2]);
                     System.out.println();
+                    Data.DB().insertItemTable(fullLine[2], fullLine[1]);
                 }
                 //System.out.println();
 

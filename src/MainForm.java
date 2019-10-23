@@ -102,8 +102,7 @@ public class MainForm {
     private void PrintReports() {
     }
 
-    private void ImportCSV() {
-    }
+    private void ImportCSV() {CSVForm.Display();  }
 
     private void ManageItems() {
     }
