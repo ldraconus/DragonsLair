@@ -8,6 +8,7 @@ import java.awt.event.*;
 
 public class CSVForm {
     private JPanel CSVPanel;
+    private CSV csvReader = new CSV();
 
     private static JFrame frame;
     public CSVForm csvForm;
@@ -39,6 +40,9 @@ public class CSVForm {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             System.out.println(jfc.getSelectedFile().getPath());
             System.out.println(jfc.getSelectedFile().getName());
+            //csvReader.setFileLocation(jfc.getSelectedFile().getPath());
+            //csvReader.setName(jfc.getSelectedFile().getPath());
+            csvReader.openFile(jfc.getSelectedFile().getPath());
         }
 
     }

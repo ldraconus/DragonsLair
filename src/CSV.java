@@ -67,6 +67,14 @@ public class CSV
         name = null;
     }
 
+    public void setFileLocation(String directory) {
+        this.directory = directory;
+    }
+
+    public void setName(String fileName) {
+        name = fileName;
+    }
+
     //Opens the provided file and prints all of the information.
     public void openFile(String location) {
         String line = "";
