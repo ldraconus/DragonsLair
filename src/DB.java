@@ -17,7 +17,7 @@ public class DB {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
                 //connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
-                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "v4d3r@Laptop");
+                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "password");
                 if (!DBExists("admin")) InitializeDB();
                 if (!TableExists("admin", "store")) InitializeStores();
             } catch (Exception e) { System.out.println(e); }
@@ -65,8 +65,10 @@ public class DB {
         }
         
         void createItemTable() {
+            ExecuteStatement("use admin");
         	ExecuteStatement("create table item(id integer not null auto_increment, " +
-        											"item varchar(300) not null, " + 
+        											"item varchar(300) not null, " +
+                                                    "diamond varchar(100), " +
         											"primary key(id))");
         }
         
@@ -394,5 +396,9 @@ public class DB {
         db.ExecuteStatement("use " + store);
         db.ExecuteData("delete from customer where name=?",
                 origCustomer);
+    }
+
+    public void insertItemTable(String itemName, String diamondCode) {
+        db.ExecuteData("insert into item(item,diamond) values(?,?)", itemName, diamondCode);
     }
 }
