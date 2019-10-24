@@ -21,7 +21,7 @@ public class ManageStoresForm {
 
     public static void Display() {
         if (frame == null) {
-            frame = new JFrame("Dragon's Lair Manage Storess");
+            frame = new JFrame("Dragon's Lair Manage Stores");
             frame.setContentPane(new ManageStoresForm().manageStoresPanel);
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             frame.pack();
@@ -109,6 +109,8 @@ public class ManageStoresForm {
         boolean selected = !storeList.isSelectionEmpty();
         if (selected) {
             String store = storeList.getSelectedValue();
+            Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + store + "?");
+            if (msg.getButton() == Message.NoButton) return;
             Data.DB().DeleteStore(store);
             UpdateList();
             SetContext();
@@ -131,11 +133,25 @@ public class ManageStoresForm {
         }
     }
 
+    private String MakeLegal(String str) {
+        String newStr = "";
+        for (int i = 0; i < str.length(); i++) {
+            if (str.charAt(i) == ' ') newStr += '_';
+            else if (str.charAt(i) != '\'' &&
+                     str.charAt(i) != '\\' &&
+                     str.charAt(i) != '/' &&
+                     str.charAt(i) != ':' &&
+                     str.charAt(i) != '"') newStr += str.charAt(i);
+        }
+        return newStr;
+    }
+
     private void Add() {
         AddStore add = new AddStore();
         if (AddStore.isOk()) {
             String store = AddStore.getStore();
             if (store.isEmpty()) return;
+            store = MakeLegal(store);
             if (Data.DB().StoreExists(store)) return;
             Data.DB().AddStore(store);
             UpdateList();

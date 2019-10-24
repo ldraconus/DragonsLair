@@ -1,5 +1,3 @@
-import com.mysql.cj.x.protobuf.MysqlxResultset;
-
 import javax.swing.*;
 import java.awt.event.*;
 
