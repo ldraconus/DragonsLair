@@ -65,8 +65,28 @@ public class DB {
         void createItemTable() {
         	ExecuteStatement("create table item(item_id integer not null auto_increment, " +
         											"item varchar(300) not null, " + 
-        											"diamond integer, " +
+        											"diamond varchar(100), " +
         											"primary key(item_id))");
+        }
+
+        void insertItemTable(String itemName, String diamondCode,String store){
+            ExecutePrepared("use ?", store);
+            if(!itemExists(diamondCode)) {
+                db.ExecuteData("insert into item(item,diamond) values(?,?))", itemName, diamondCode);
+            }
+
+        }
+
+        Boolean itemExists(String diamondCode){
+            ResultSet theDiamond = db.ExecutePrepared("select diamond from item where diamond = ?",diamondCode);
+            try { return theDiamond != null && theDiamond.next(); }
+            catch (Exception e) { System.out.println(e); }
+            return false;
+
+        }
+        void deleteItemTable(String itemName){
+            db.ExecuteData("delete from item where item = ?",itemName);
+
         }
         
         void createPullListTable() {
