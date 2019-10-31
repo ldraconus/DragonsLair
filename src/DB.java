@@ -65,7 +65,6 @@ public class DB {
         }
         
         void createItemTable() {
-            ExecuteStatement("use admin");
         	ExecuteStatement("create table item(id integer not null auto_increment, " +
         											"item varchar(300) not null, " +
                                                     "diamond varchar(100), " +
@@ -398,7 +397,21 @@ public class DB {
                 origCustomer);
     }
 
-    public void insertItemTable(String itemName, String diamondCode) {
-        db.ExecuteData("insert into item(item,diamond) values(?,?)", itemName, diamondCode);
+    Boolean itemExists(String diamondCode) {
+        ResultSet theDiamond = db.ExecutePrepared("select diamond from item where diamond = ?", diamondCode);
+        try { return theDiamond != null && theDiamond.next(); }
+        catch (Exception e) {System.out.println(e);
+        return false;
+    }
+}
+
+    public void insertItemTable(String itemName, String diamondCode, String store) {
+        if (!itemExists(diamondCode)) {
+            db.ExecuteStatement("use " +  store);
+            db.ExecuteData("insert ignore into item(item,diamond) values(?,?)", itemName, diamondCode);
+        }
+        else {
+            System.out.println("Item skipped");
+        }
     }
 }
