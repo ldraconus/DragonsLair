@@ -91,13 +91,14 @@ public class CSV
                 //    System.out.printf("%-5s ", fullLine[i]);
                 //}
                 if (length > 4) {
-                    System.out.printf("Diamond Number: %s\tName: %-60.60s", fullLine[1], fullLine[2]);
+                    System.out.printf("Diamond Number: '%s'\tName: %-60.60s", fullLine[1], fullLine[2]);
                     System.out.println();
-                    Data.DB().insertItemTable(fullLine[2], fullLine[1]);
+                    Data.DB().insertItemTable(fullLine[2], fullLine[1], Data.Store());
                 }
-                //System.out.println();
+
 
             }
+            System.out.printf("Length of file: %d\n", length - 4);
         }
 
         catch (FileNotFoundException FNF) {
