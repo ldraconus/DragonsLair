@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.event.*;
 
+/**
+ * Provides form and functionality to manage system preferences.
+ */
 public class PrefsForm {
     private JButton manageStoresButton;
     private JPanel PrefsPanel;
@@ -10,13 +13,24 @@ public class PrefsForm {
     private static JFrame frame;
     public static PrefsForm prefsForm = null;
 
+    /**
+     * Returns the JFrame.
+     * @return JFrame.
+     */
     public static JFrame Frame() { return frame; }
+
+    /**
+     * Dispose the JFrame.
+     */
     public static void Dispose() { // dispose sub window
         ManageUsersForm.Dispose();
         ManageStoresForm.Dispose();
         if (frame != null) frame.dispose();
     }
 
+    /**
+     * Create a new JFrame and display the initial UI components.
+     */
     public static void Display() {
         if (frame == null) {
             frame = new JFrame("Dragon's Lair Preferences");
@@ -28,6 +42,10 @@ public class PrefsForm {
         frame.setVisible(true);
     }
 
+    /**
+     * Class constructor.
+     * Setup action listeners for UI components.
+     */
     public PrefsForm() {
         prefsForm = this;
         PrefsPanel.registerKeyboardAction(new ActionListener() {
@@ -59,24 +77,42 @@ public class PrefsForm {
         });
     }
 
+    /**
+     * Set context.
+     */
     private void Open() {
         SetContext();
     }
 
+    /**
+     * Set the Preference Form context.
+     */
     public static void setContext() {
         prefsForm.SetContext();
     }
 
+    /**
+     * Enable or disable manage login button.
+     */
     private void SetContext() {
         manageLoginsButton.setEnabled(Data.DB().GetStores().size() != 0);
     }
 
+    /**
+     * Display Manage Users Form.
+     */
     private void ManageLogins() {
         ManageUsersForm.Display();
     }
 
+    /**
+     * Display Manage Stores Form.
+     */
     private void ManageStores() { ManageStoresForm.Display(); }
 
+    /**
+     * Hide JFrame.
+     */
     private void Done() {
         frame.setVisible(false);
     }
