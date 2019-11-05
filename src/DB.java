@@ -17,7 +17,7 @@ public class DB {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
                 //connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
-                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "password");
+                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "Aerospace1907");
                 if (!DBExists("admin")) InitializeDB();
                 if (!TableExists("admin", "store")) InitializeStores();
             } catch (Exception e) { System.out.println(e); }
