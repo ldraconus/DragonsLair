@@ -13,11 +13,10 @@ public class DB {
     private class Connection {
         private java.sql.Connection connection = null;
 
-        Connection(String host) {
+        Connection(String host, String name, String pass) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-                //connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
-                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "password");
+                connection = DriverManager.getConnection(host, name, pass);
                 if (!DBExists("admin")) InitializeDB();
                 if (!TableExists("admin", "store")) InitializeStores();
             } catch (Exception e) { System.out.println(e); }
@@ -65,7 +64,6 @@ public class DB {
         }
         
         void createItemTable() {
-            ExecuteStatement("use admin");
         	ExecuteStatement("create table item(id integer not null auto_increment, " +
         											"item varchar(300) not null, " +
                                                     "diamond varchar(100), " +
@@ -195,15 +193,11 @@ public class DB {
 
     private Connection db = null;
 
-    private void Init(String host) {
-        db = new Connection(host);
+    private void Init(String host, String user, String password) {
+        db = new Connection(host, user, password);
     }
 
-    public DB(String host) { Init(host); }
-    public DB() {
-        String defaultHost = "jdbc:mysql://localhost:3306";
-        Init(defaultHost);
-    }
+    public DB(String host, String user, String pass) { Init(host, user, pass); }
 
     public boolean Login(String username, char[] password) {
         String pass = "";
@@ -398,7 +392,21 @@ public class DB {
                 origCustomer);
     }
 
-    public void insertItemTable(String itemName, String diamondCode) {
-        db.ExecuteData("insert into item(item,diamond) values(?,?)", itemName, diamondCode);
+    Boolean itemExists(String diamondCode) {
+        ResultSet theDiamond = db.ExecutePrepared("select diamond from item where diamond = ?", diamondCode);
+        try { return theDiamond != null && theDiamond.next(); }
+        catch (Exception e) {System.out.println(e);
+        return false;
+    }
+}
+
+    public void insertItemTable(String itemName, String diamondCode, String store) {
+        if (!itemExists(diamondCode)) {
+            db.ExecuteStatement("use " +  store);
+            db.ExecuteData("insert ignore into item(item,diamond) values(?,?)", itemName, diamondCode);
+        }
+        else {
+            System.out.println("Item skipped");
+        }
     }
 }
