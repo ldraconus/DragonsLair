@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.event.*;
 
+/**
+ * Provides different messages to display.
+ */
 public class Message extends JDialog {
     private JPanel contentPane;
     private JLabel Message;
@@ -23,10 +26,20 @@ public class Message extends JDialog {
     int dialogType = Nothing;
     static int button = Nothing;
 
+    /**
+     * Return the button.
+     * @return int Returns button.
+     */
     public int getButton() {
         return button;
     }
 
+    /**
+     * Class constructor.
+     * Setup action listeners.
+     * @param type Dialog type.
+     * @param msg Dialog message.
+     */
     public Message(int type, String msg) {
         setContentPane(contentPane);
 
@@ -125,6 +138,9 @@ public class Message extends JDialog {
         this.setVisible(true);
     }
 
+    /**
+     * Set button1's dialog.
+     */
     private void onButton1() {
         switch (dialogType) {
             case OKMessage:          button = Nothing;   break;
@@ -136,6 +152,9 @@ public class Message extends JDialog {
         dispose();
     }
 
+    /**
+     * Set button2's dialog.
+     */
     private void onButton2() {
         switch (dialogType) {
             case OKMessage:          button = OkButton;     break;
@@ -147,6 +166,9 @@ public class Message extends JDialog {
         dispose();
     }
 
+    /**
+     * Set buttons3's dialog.
+     */
     private void onButton3() {
         switch (dialogType) {
             case OKMessage:          button = Nothing;      break;
