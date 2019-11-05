@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.util.Scanner;
 
-//This class is responsible for opening a .csv file.
+/**
+ * This class is responsible for opening a .csv file and adding to the database.
+ */
 public class CSV
 {
     String name = null;
@@ -18,30 +20,46 @@ public class CSV
     File csvFile;
     BufferedReader reader = null;
 
-    //DB database = new DB();
-
 
     private static Scanner input = new Scanner(System.in);
 
+    /**
+     * getInfo prints the file name, number of lines in the file, and file extension to the console.
+     */
     public void getInfo() {
         System.out.println("\tFile name: " + name);
         System.out.printf("\tFile length: %s lines\n", length);
         System.out.println("\tFile extension: " + extensionType);
     }
 
-    //Returns file path name. Use in conjunction with openFile after calling getFile.
+
+    /**
+     * Used to get the location of the file.
+     * @return file path name.
+     */
     public String getLocation() { return fileLocation; }
 
-    //getFile is preferred over setLocation. Only use if location is a known valid .csv file location.
+
+    /**
+     * setLocation - Set the location of the file to read.
+     * @param location location to set as file location. Does not do validity checking.
+     */
     public void setLocation(String location)
     {
         fileLocation = location;
     }
 
-    //Returns the length of the file that was read.
+
+    /**
+     * getLength of the file.
+     * @return total file length in number of lines.
+     */
     public int getLength() {return length;}
 
-    //Sets all necessary parameters of a file to be able to open it.
+
+    /**
+     * Get all information for opening a file. Only useful from command line.
+     */
     public void getFile() {
         System.out.print("File to open: ");
         fileLocation = input.nextLine();
@@ -57,7 +75,9 @@ public class CSV
         }
     }
 
-    //Resets file information if the attempted file was not a .csv file.
+    /**
+     * Reset all file information to default.
+     */
     private void fileReset() {
         fileLocation = null;
         lastSlash = 0;
@@ -67,15 +87,26 @@ public class CSV
         name = null;
     }
 
+    /**
+     * Set the file directory to read from. Does not do validity checking.
+     * @param directory directory file is located in.
+     */
     public void setFileLocation(String directory) {
         this.directory = directory;
     }
 
+    /**
+     * Set the file name to read from. Does not do validity checking.
+     * @param fileName Name of the file to read.
+     */
     public void setName(String fileName) {
         name = fileName;
     }
 
-    //Opens the provided file and prints all of the information.
+    /**
+     * Opens a file and add items to the database. Prints information to the command line.
+     * @param location File location to be read.
+     */
     public void openFile(String location) {
         String line = "";
 
@@ -87,9 +118,6 @@ public class CSV
 
                 String[] fullLine = line.split(",");
 
-                //for (int i = 0; i < fullLine.length; i++) {
-                //    System.out.printf("%-5s ", fullLine[i]);
-                //}
                 if (length > 4) {
                     System.out.printf("Diamond Number: '%s'\tName: %-60.60s", fullLine[1], fullLine[2]);
                     System.out.println();
