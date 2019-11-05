@@ -1,7 +1,9 @@
+import Properties.Read;
+
 public class Data {
     private static String store = "";
     private static String user = "";
-    private static DB db = new DB();
+    private static DB db = new DB(Read.getDir(), Read.getUser(), Read.getPW());
 
     public static DB DB() { return db; }
 

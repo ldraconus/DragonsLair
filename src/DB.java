@@ -13,11 +13,10 @@ public class DB {
     private class Connection {
         private java.sql.Connection connection = null;
 
-        Connection(String host) {
+        Connection(String host, String name, String pass) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-                //connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
-                connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "Aerospace1907");
+                connection = DriverManager.getConnection(host, name, pass);
                 if (!DBExists("admin")) InitializeDB();
                 if (!TableExists("admin", "store")) InitializeStores();
             } catch (Exception e) { System.out.println(e); }
@@ -40,58 +39,57 @@ public class DB {
             ExecuteStatement("create database admin");
             ExecuteStatement("use admin");
             ExecuteStatement("create table user (id integer not null auto_increment, " +
-                    "name varchar(40) not null, " +
-                    "password char(40) not null, " +
-                    "store integer, " +
-                    "primary key(id))");
+                                                     "name varchar(40) not null, " +
+                                                     "password char(40) not null, " +
+                                                     "store integer, " +
+                                                     "primary key(id))");
             ExecuteStatement("insert into user (name, password) " +
-                    "values ('admin', sha('admin'))");
+                                              "values ('admin', sha('admin'))");
             InitializeStores();
         }
 
         void InitializeStores() {
             ExecuteStatement("use admin");
             ExecuteStatement("create table admin.store (id integer not null auto_increment, " +
-                    "name varchar(128), " +
-                    "primary key(id))");
+                                                            "name varchar(128), " +
+                                                            "primary key(id))");
         }
-
+        
         void createCustomerTable() {
-            ExecuteStatement("create table customer(id integer not null auto_increment, " +
-                    "name varchar(40) not null, " +
-                    "phone varchar(20), " +
-                    "email varchar(100), " +
-                    "primary key(id))");
+        	ExecuteStatement("create table customer(id integer not null auto_increment, " +
+        												"name varchar(40) not null, " +
+        												"phone varchar(20), " + 
+        												"email varchar(100), " + 
+        												"primary key(id))");
         }
-
+        
         void createItemTable() {
-            ExecuteStatement("use admin");
-            ExecuteStatement("create table item(id integer not null auto_increment, " +
-                    "item varchar(300) not null, " +
-                    "diamond varchar(100), " +
-                    "primary key(id))");
+        	ExecuteStatement("create table item(id integer not null auto_increment, " +
+        											"item varchar(300) not null, " +
+                                                    "diamond varchar(100), " +
+        											"primary key(id))");
         }
-
+        
         void createPullListTable() {
-            ExecuteStatement("create table pull_list(id integer not null auto_increment, " +
-                    "customer_id integer, " +
-                    "item_id integer, " +
-                    "issue integer, " +
-                    "allVariants boolean, " +
-                    "quantity integer, " +
-                    "isGraphic boolean, " +
-                    "primary key(id), " +
-                    "foreign key (customer_id) references customer(id), "+
-                    "foreign key (item_id) references item(id))");
+        	ExecuteStatement("create table pull_list(id integer not null auto_increment, " +
+        											"customer_id integer, " +
+        											"item_id integer, " +
+        											"issue integer, " +
+        											"allVariants boolean, " +
+        											"quantity integer, " +
+        											"isGraphic boolean, " +
+        											"primary key(id), " +
+        											"foreign key (customer_id) references customer(id), "+
+        											"foreign key (item_id) references item(id))");
         }
 
         void createItemMapTable(){
             ExecuteStatement("create table ItemMap(id integer not null auto_increment, " +
-                    "wants integer, " +
-                    "got integer, " +
-                    "primary key(id), " +
-                    "foreign key(wants) references item(id), " +
-                    "foreign key(got) references item(id))");
+                                                "wants integer, " +
+                                                "got integer, " +
+                                                "primary key(id), " +
+                                                "foreign key(wants) references item(id), " +
+                                                "foreign key(got) references item(id))");
         }
 
         void createPullItemTable(){
@@ -105,20 +103,20 @@ public class DB {
 
         void createPullDateTable(){
             ExecuteStatement("create table pullDate(id integer not null auto_increment, " +
-                    "pull_id integer, " +
-                    "date date, " +
-                    "primary key(id), " +
-                    "foreign key (pull_id) references pull_list(id))");
+                                                "pull_id integer, " +
+                                                "date date, " +
+                                                "primary key(id), " +
+                                                "foreign key (pull_id) references pull_list(id))");
         }
 
         void createQuantityTable(){
             ExecuteStatement("create table quantity(id integer not null auto_increment, " +
-                    "customer_id integer, " +
-                    "pull_id integer, " +
-                    "quantity integer, " +
-                    "primary key(id), " +
-                    "foreign key(customer_id) references customer(id), " +
-                    "foreign key(pull_id) references pull_list(id))");
+                                                "customer_id integer, " +
+                                                "pull_id integer, " +
+                                                "quantity integer, " +
+                                                "primary key(id), " +
+                                                "foreign key(customer_id) references customer(id), " +
+                                                "foreign key(pull_id) references pull_list(id))");
         }
 
 
@@ -176,8 +174,8 @@ public class DB {
 
         private boolean TableExists(String db, String name) {
             String sql = "SELECT * " +
-                    "FROM information_schema.TABLES " +
-                    "WHERE (TABLE_SCHEMA = ?) AND (TABLE_NAME = ?)";
+                         "FROM information_schema.TABLES " +
+                         "WHERE (TABLE_SCHEMA = ?) AND (TABLE_NAME = ?)";
             ResultSet r = ExecutePrepared(sql, db, name);
             try { return r != null && r.next(); }
             catch (Exception e) { System.out.println(e); }
@@ -195,15 +193,11 @@ public class DB {
 
     private Connection db = null;
 
-    private void Init(String host) {
-        db = new Connection(host);
+    private void Init(String host, String user, String password) {
+        db = new Connection(host, user, password);
     }
 
-    public DB(String host) { Init(host); }
-    public DB() {
-        String defaultHost = "jdbc:mysql://localhost:3306";
-        Init(defaultHost);
-    }
+    public DB(String host, String user, String pass) { Init(host, user, pass); }
 
     public boolean Login(String username, char[] password) {
         String pass = "";
@@ -229,8 +223,8 @@ public class DB {
 
     public boolean StoreInUse(String store) {
         ResultSet data = db.ExecutePrepared("select admin.store.id " +
-                "from admin.store, admin.user " +
-                "where admin.store.name = ? and admin.user.store = admin.store.id", store);
+                                                 "from admin.store, admin.user " +
+                                                 "where admin.store.name = ? and admin.user.store = admin.store.id", store);
         try { return data != null && data.next(); }
         catch (Exception e) { System.out.println(e); }
         return false;
@@ -238,8 +232,8 @@ public class DB {
 
     public boolean StoreExists(String store) {
         ResultSet data = db.ExecutePrepared("select id " +
-                "from admin.store " +
-                "where name = ?", store);
+                                                 "from admin.store " +
+                                                 "where name = ?", store);
         try { return data != null && data.next(); }
         catch (Exception e) { System.out.println(e); }
         return false;
@@ -299,7 +293,7 @@ public class DB {
     public void AddUser(String user, String password, String store) {
         int id = GetStoreId(store);
         db.ExecuteData("insert into admin.user (name, password, store) values(?, sha(?), ?)",
-                user, password, Integer.toString(id));
+                       user, password, Integer.toString(id));
     }
 
     public void DeleteUser(String user) {
@@ -311,13 +305,13 @@ public class DB {
         if (password.isEmpty()) db.ExecuteData("update admin.user set admin.user.name = ?, admin.user.store = ? " +
                 "where admin.user.name = ?", name, Integer.toString(id), orig);
         else db.ExecuteData("update admin.user set admin.user.name = ?, admin.user.password = sha(?), admin.user.store = ? " +
-                "where admin.user.name = ?", name, password, Integer.toString(id), orig);
+                                              "where admin.user.name = ?", name, password, Integer.toString(id), orig);
     }
 
     public String GetUserStore(String user) {
         ResultSet r = db.ExecutePrepared("select store.name from admin.user, admin.store " +
-                "where admin.user.name = ? " +
-                "and admin.user.store = admin.store.id", user);
+                                                                "where admin.user.name = ? " +
+                                                                  "and admin.user.store = admin.store.id", user);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -398,23 +392,21 @@ public class DB {
                 origCustomer);
     }
 
-
-    void insertItemTable(String itemName, String diamondCode){
-        if(!itemExists(diamondCode)) {
-            db.ExecuteData("insert into item(item,diamond) values(?,?))", itemName, diamondCode);
-        }
-
-    }
-
-    Boolean itemExists(String diamondCode){
-        ResultSet theDiamond = db.ExecutePrepared("select diamond from item where diamond = ?",diamondCode);
+    Boolean itemExists(String diamondCode) {
+        ResultSet theDiamond = db.ExecutePrepared("select diamond from item where diamond = ?", diamondCode);
         try { return theDiamond != null && theDiamond.next(); }
-        catch (Exception e) { System.out.println(e); }
+        catch (Exception e) {System.out.println(e);
         return false;
-
     }
-    void deleteItemTable(String itemName){
-        db.ExecuteData("delete from item where item = ?",itemName);
+}
 
+    public void insertItemTable(String itemName, String diamondCode, String store) {
+        if (!itemExists(diamondCode)) {
+            db.ExecuteStatement("use " +  store);
+            db.ExecuteData("insert ignore into item(item,diamond) values(?,?)", itemName, diamondCode);
+        }
+        else {
+            System.out.println("Item skipped");
+        }
     }
 }
