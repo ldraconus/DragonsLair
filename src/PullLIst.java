@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.event.*;
 
+/**
+ * Manage customer pull list.
+ */
 public class PullLIst extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
@@ -12,6 +15,10 @@ public class PullLIst extends JDialog {
     private JButton removeButton;
     private JTextField textField3;
 
+    /**
+     * Class constructor.
+     * Setup action listeners for UI components.
+     */
     public PullLIst() {
         setContentPane(contentPane);
         setModal(true);
@@ -45,11 +52,17 @@ public class PullLIst extends JDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
+    /**
+     * Still working on.
+     */
     private void onOK() {
         // add your code here
         dispose();
     }
 
+    /**
+     * Still working on.
+     */
     private void onCancel() {
         // add your code here if necessary
         dispose();

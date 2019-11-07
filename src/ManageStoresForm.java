@@ -4,6 +4,9 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.*;
 import java.util.Vector;
 
+/**
+ * Provides UI and functionality to manage stores.
+ */
 public class ManageStoresForm {
     private JPanel manageStoresPanel;
     private JButton addButton;
@@ -14,11 +17,24 @@ public class ManageStoresForm {
     private JScrollPane scrollPane;
 
     private static JFrame frame;
+
+    /**
+     /**
+     * Return JFrame.
+     * @return JFrame Returns the frame used in this class.
+     */
     public static JFrame Frame() { return frame; }
+
+    /**
+     * Dispose the JFrame.
+     */
     public static void Dispose() { // dispose sub windows
         if (frame != null) frame.dispose();
     }
 
+    /**
+     * Create a new JFrame and display the initial UI components.
+     */
     public static void Display() {
         if (frame == null) {
             frame = new JFrame("Dragon's Lair Manage Stores");
@@ -30,6 +46,10 @@ public class ManageStoresForm {
         frame.setVisible(true);
     }
 
+    /**
+     * Class constructor.
+     * Setup action listeners for UI components.
+     */
     public ManageStoresForm() {
         manageStoresPanel.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -69,10 +89,16 @@ public class ManageStoresForm {
         });
     }
 
+    /**
+     * Set the context.
+     */
     private void SelectionChanged() {
         SetContext();
     }
 
+    /**
+     * Update the list of stores.
+     */
     private void UpdateList() {
         storeList.clearSelection();
         Vector<String> stores = Data.DB().GetStores();
@@ -81,6 +107,9 @@ public class ManageStoresForm {
         storeList.setModel(data);
     }
 
+    /**
+     * Update the store list and set the context.
+     */
     private void Open() {
         storeList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         UpdateList();
@@ -88,6 +117,9 @@ public class ManageStoresForm {
         frame.setVisible(true);
     }
 
+    /**
+     * Set the context.
+     */
     private void SetContext() {
         boolean selected = !storeList.isSelectionEmpty();
         boolean deleteable = true;
@@ -101,10 +133,16 @@ public class ManageStoresForm {
         PrefsForm.setContext();
     }
 
+    /**
+     * Hide the JFrame.
+     */
     private void Done() {
         frame.setVisible(false);
     }
 
+    /**
+     * Delete store.
+     */
     private void Delete() {
         boolean selected = !storeList.isSelectionEmpty();
         if (selected) {
@@ -117,6 +155,9 @@ public class ManageStoresForm {
         }
     }
 
+    /**
+     * Edit store.
+     */
     private void Edit() {
         boolean selected = !storeList.isSelectionEmpty();
         if (!selected) return;
@@ -133,6 +174,11 @@ public class ManageStoresForm {
         }
     }
 
+    /**
+     * Modify store name.
+     * @param str Name of the store.
+     * @return String Returns new string after modifications.
+     */
     private String MakeLegal(String str) {
         String newStr = "";
         for (int i = 0; i < str.length(); i++) {
@@ -146,6 +192,9 @@ public class ManageStoresForm {
         return newStr;
     }
 
+    /**
+     * Add new store.
+     */
     private void Add() {
         AddStore add = new AddStore();
         if (AddStore.isOk()) {

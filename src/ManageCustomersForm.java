@@ -4,6 +4,9 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.*;
 import java.util.Vector;
 
+/**
+ * Provides form and functionality to manage customers.
+ */
 public class ManageCustomersForm {
     private JList<String> customerList;
     private JButton addButton;
@@ -17,10 +20,16 @@ public class ManageCustomersForm {
 
     private Vector<String> customers;
 
+    /**
+     * Dispose of the JFrame.
+     */
     public static void Dispose() { // dispose sub windows
         if (frame != null) frame.dispose();
     }
 
+    /**
+     * Create a new JFrame and add the initial UI components.
+     */
     public static void Display() {
         if (frame == null) {
             frame = new JFrame("Dragon's Lair Manage Customers");
@@ -32,6 +41,10 @@ public class ManageCustomersForm {
         frame.setVisible(true);
     }
 
+    /**
+     * Class constructor.
+     * Setup action listeners for UI components.
+     */
     public ManageCustomersForm() {
         manageCustomersPanel.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -88,6 +101,9 @@ public class ManageCustomersForm {
         });
     }
 
+    /**
+     * Search filter
+     */
     private void searchCustomers() {
         String text = searchTextField.getText();
         if (text.isEmpty()) {
@@ -101,12 +117,19 @@ public class ManageCustomersForm {
         SetContext();
     }
 
+    /**
+     * Enable or disable add, delete, and edit.
+     */
     private void SetContext() {
         addButton.setEnabled(true);
         deleteButton.setEnabled(!customerList.isSelectionEmpty());
         editButton.setEnabled(!customerList.isSelectionEmpty());
     }
 
+    /**
+     * Filter the customer list.
+     * @param cust Used for filtering.
+     */
     private void SetCustomerList(Vector<String> cust) {
         customerList.clearSelection();
         DefaultListModel<String> data = new DefaultListModel<String>();
@@ -114,6 +137,9 @@ public class ManageCustomersForm {
         customerList.setModel(data);
     }
 
+    /**
+     * Get and set the customer list.
+     */
     private void Open() {
         customerList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         customers = Data.DB().GetCustomers();
@@ -122,6 +148,9 @@ public class ManageCustomersForm {
         frame.setVisible(true);
     }
 
+    /**
+     * Add new customer.
+     */
     private void Add() {
         new AddCustomer();
         if (AddCustomer.isOk()) {
@@ -137,6 +166,9 @@ public class ManageCustomersForm {
         }
     }
 
+    /**
+     * Edit customer.
+     */
     private void Edit() {
         boolean selected = !customerList.isSelectionEmpty();
         if (!selected) return;
@@ -157,6 +189,9 @@ public class ManageCustomersForm {
         }
     }
 
+    /**
+     * Delete customer.
+     */
     private void Delete() {
         boolean selected = !customerList.isSelectionEmpty();
         if (!selected) return;
@@ -166,10 +201,16 @@ public class ManageCustomersForm {
         Data.DB().DeleteCustomer(Data.Store(), origCustomer);
     }
 
+    /**
+     * Hide the frame.
+     */
     private void Done() {
         frame.setVisible(false);
     }
 
+    /**
+     * Set the context.
+     */
     private void SelectionChanged() {
         SetContext();
     }
