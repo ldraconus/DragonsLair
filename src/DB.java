@@ -604,7 +604,7 @@ public class DB {
             db.ExecuteData("insert ignore into item(item,diamond) values(?,?)", itemName, diamondCode);
         }
         else {
-            System.out.println("Item skipped");
+            System.out.println("skipped");
         }
     }
 }
