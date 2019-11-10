@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Vector;
 
+//import com.sun.istack.internal.NotNull;
+
 public class DB {
 
     private class Connection {
@@ -12,6 +14,7 @@ public class DB {
         Connection(String host) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+                //connection = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","Aerospace1907");
                 connection = DriverManager.getConnection(host + "?serverTimezone=US/Central", "root", "v4d3r@Laptop");
                 if (!DBExists("admin")) InitializeDB();
                 if (!TableExists("admin", "store")) InitializeStores();
@@ -51,13 +54,81 @@ public class DB {
                                                             "primary key(id))");
         }
 
+        void createCustomerTable() {
+        	ExecuteStatement("create table customer(id integer not null auto_increment, " +
+        												"name varchar(40) not null, " +
+        												"phone varchar(20), " +
+        												"email varchar(100), " +
+        												"primary key(id))");
+        }
+
+        void createItemTable() {
+        	ExecuteStatement("create table item(id integer not null auto_increment, " +
+        											"item varchar(300) not null, " +
+        											"primary key(id))");
+        }
+
+        void createPullListTable() {
+        	ExecuteStatement("create table pull_list(id integer not null auto_increment, " +
+        											"customer_id integer, " +
+        											"item_id integer, " +
+        											"issue integer, " +
+        											"allVariants boolean, " +
+        											"quantity integer, " +
+        											"isGraphic boolean, " +
+        											"primary key(id), " +
+        											"foreign key (customer_id) references customer(id), "+
+        											"foreign key (item_id) references item(id))");
+        }
+
+        void createItemMapTable(){
+            ExecuteStatement("create table ItemMap(id integer not null auto_increment, " +
+                                                "wants integer, " +
+                                                "got integer, " +
+                                                "primary key(id), " +
+                                                "foreign key(wants) references item(id), " +
+                                                "foreign key(got) references item(id))");
+        }
+
+        void createPullItemTable(){
+            ExecuteStatement("create table pullItem(id integer not null auto_increment, " +
+                    "item_id integer, " +
+                    "pull_id integer, " +
+                    "primary key(id), " +
+                    "foreign key(item_id) references item(id), " +
+                    "foreign key(pull_id) references pull_list(id))");
+        }
+
+        void createPullDateTable(){
+            ExecuteStatement("create table pullDate(id integer not null auto_increment, " +
+                                                "pull_id integer, " +
+                                                "date date, " +
+                                                "primary key(id), " +
+                                                "foreign key (pull_id) references pull_list(id))");
+        }
+
+        void createQuantityTable(){
+            ExecuteStatement("create table quantity(id integer not null auto_increment, " +
+                                                "customer_id integer, " +
+                                                "pull_id integer, " +
+                                                "quantity integer, " +
+                                                "primary key(id), " +
+                                                "foreign key(customer_id) references customer(id), " +
+                                                "foreign key(pull_id) references pull_list(id))");
+        }
+
+
+
         void InitializeStore(String store) {
-            ExecutePrepared("create database ?", store);
-            ExecutePrepared("use ?", store);
-            // create customer table
-            // create item table
-            // create customer_item table
-            // create pull_list table
+            ExecuteStatement("create database " + store);
+            ExecuteStatement("use " + store);
+            createCustomerTable();
+            createItemTable();
+            createPullListTable();
+            createItemMapTable();
+            createPullDateTable();
+            createPullItemTable();
+            createQuantityTable();
         }
 
         PreparedStatement prep = null;
@@ -172,6 +243,7 @@ public class DB {
 
     public void AddStore(String store) {
         db.ExecuteData("insert into admin.store (name) values(?)", store);
+        db.InitializeStore(store);
     }
 
     public void DeleteStore(String store) {
@@ -253,7 +325,8 @@ public class DB {
 
     public Vector<String> GetCustomers() {
         Vector<String> customers = new Vector<>();
-        ResultSet data = db.ExecutePrepared("select name from ?.customers", Data.Store());
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select name from customers");
 
         try {
             if (data != null) {
@@ -265,5 +338,59 @@ public class DB {
         catch(Exception e) { System.out.println(e); }
 
         return customers;
+    }
+
+    public boolean CustomerExists(String store, String customer) {
+        db.ExecuteStatement("use " + store);
+        ResultSet data = db.ExecutePrepared("select id " +
+                "from customer " +
+                "where name = ?", customer);
+        try { return data != null && data.next(); }
+        catch (Exception e) { System.out.println(e); }
+        return false;
+    }
+
+    public void AddCustomer(String store, String name, String email, String phone) {
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into customer (name, email, phone) values(?, ?, ?)",
+                name, email, phone);
+    }
+
+    public String GetCustomerEMail(String store, String name) {
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select customer.email from customer " +
+                "where customer.name = ? ", name);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("customer.email");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    public String GetCustomerPhone(String store, String name) {
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select customer.phone from ?.customer " +
+                "where customer.name = ? ", name);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("customer.phone");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    public void UpdateCustomer(String store, String origCustomer, String customer, String email, String phone) {
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("update customer set name=?, email=?, phone=? where name=?",
+                customer, email, phone, origCustomer);
+    }
+
+    public void DeleteCustomer(String store, String origCustomer) {
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("delete from customer where name=?",
+                origCustomer);
     }
 }
