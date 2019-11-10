@@ -1,7 +1,7 @@
-import org.jetbrains.annotations.NotNull;
-
-import java.sql.*;
-import java.util.Arrays;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Vector;
 
 public class DB {
@@ -130,7 +130,7 @@ public class DB {
         Init(defaultHost);
     }
 
-    public boolean Login(String username, @NotNull char[] password) {
+    public boolean Login(String username, char[] password) {
         String pass = "";
         for (Character c: password) pass += c;
         return db.Login(username, pass);
