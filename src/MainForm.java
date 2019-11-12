@@ -128,8 +128,7 @@ public class MainForm {
     /**
      * FUTURE: Display the Print Reports Form.
      */
-    private void PrintReports() {
-    }
+    private void PrintReports() { PrintReports.Display();}
 
     /**
      * FUTURE: Display the CSV Form.
@@ -157,6 +156,8 @@ public class MainForm {
         LoginForm.Dispose();
         PrefsForm.Dispose();
         ManageCustomersForm.Dispose();
+        CSVForm.Dispose();
+        PrintReports.Dispose();
         LoginForm.Display();
     }
 }
