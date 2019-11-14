@@ -121,10 +121,8 @@ public class CSV
                 if (length > 4) {
                     System.out.printf("Diamond Number: '%s'\tName: %-60.60s", fullLine[1], fullLine[2]);
                     System.out.println();
-                    Data.DB().insertItemTable(fullLine[2], fullLine[1], Data.Store());
+                    Data.DB().insertItemTable(fullLine[2].replaceAll("\"", ""), fullLine[1].replaceAll("\"",""), Data.Store());
                 }
-
-
             }
             System.out.printf("Length of file: %d\n", length - 4);
         }
