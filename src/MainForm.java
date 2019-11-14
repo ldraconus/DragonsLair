@@ -140,6 +140,7 @@ public class MainForm {
      * FUTURE: Display the Manage Comics Form.
      */
     private void ManageItems() {
+        ManageComicsForm.Display();
     }
 
     /**
