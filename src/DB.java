@@ -473,7 +473,7 @@ public class DB {
     public Vector<String> GetCustomers() {
         Vector<String> customers = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
-        ResultSet data = db.ExecutePrepared("select name from customers");
+        ResultSet data = db.ExecutePrepared("select name from customer");
 
         try {
             if (data != null) {
@@ -544,7 +544,7 @@ public class DB {
     public String GetCustomerPhone(String store, String name) {
         db.ExecuteStatement("use " + store);
         ResultSet r = db.ExecutePrepared("select customer.phone from ?.customer " +
-                "where customer.name = ? ", name);
+                "where customer.name = ? ", store, name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";

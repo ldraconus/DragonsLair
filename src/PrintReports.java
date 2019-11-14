@@ -85,7 +85,7 @@ public class PrintReports {
     /**
      * Makes the frame invisible, also known as closing it.
      */
-    private void Done() { frame.setVisible(false); }
+    private void Done() { /*frame.setVisible(false);*/ frame.dispose();}
 
     /**
      * Opens the window.
