@@ -468,7 +468,7 @@ public class DB {
 
     /**
      * Returns all the customers from the database.
-     * @return: A vector with all the customers.
+     * @return: A vector with all the customer names.
      */
     public Vector<String> GetCustomers() {
         Vector<String> customers = new Vector<>();
@@ -604,7 +604,39 @@ public class DB {
             db.ExecuteData("insert ignore into item(item,diamond) values(?,?)", itemName, diamondCode);
         }
         else {
-            System.out.println("Item skipped");
+            System.out.println("skipped");
         }
+    }
+
+    /**
+     * Returns all the comics from the database.
+     * @return: A vector with all the comic names.
+     */
+    public Vector<String> GetComics() {
+        Vector<String> comics = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select item from item");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    comics.add(data.getString("item"));
+                }
+            }
+        }
+        catch(Exception e) { System.out.println(e); }
+
+        return comics;
+    }
+
+    /**
+     * Deletes a comic from the database.
+     * @param store: The store the comic is located.
+     * @param comic: The name of the comic being deleted.
+     */
+    public void DeleteComic(String store, String comic) {
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("delete from item where item=?",
+                comic);
     }
 }
