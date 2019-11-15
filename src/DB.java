@@ -80,81 +80,86 @@ public class DB {
         }
 
         /**
-         * Holds all the required information for storing items that Dragon's Lair sells.
+         * Customers use different terms when defining what they want compared to what the
+         * store actually has.
          */
-        void createItemTable() {
-        	ExecuteStatement("create table item(id integer not null auto_increment, " +
-        											"item varchar(300) not null, " +
+        void createSearchTerms() {
+        	ExecuteStatement("create table searchTerms(id integer not null auto_increment, " +
+        											"name varchar(128) not null, " +
                                                     "diamond varchar(100), " +
+                                                    "issue integer, " +
+                                                    "graphicNovel integer, " +
+                                                    "collection integer, " +
+                                                    "nonBook integer, " +
+                                                    "match varchar(128), " +
         											"primary key(id))");
         }
 
         /**
-         * Stores information from the customer and item tables to create the pull list.
-         * Additional information is provided here based on customer requests.
+         * This table matches a search term with a customer and how many comics using that search
+         * term they want.
          */
-        void createPullListTable() {
-        	ExecuteStatement("create table pull_list(id integer not null auto_increment, " +
-        											"customer_id integer, " +
-        											"item_id integer, " +
-        											"issue integer, " +
-        											"allVariants boolean, " +
-        											"quantity integer, " +
-        											"isGraphic boolean, " +
-        											"primary key(id), " +
-        											"foreign key (customer_id) references customer(id), "+
-        											"foreign key (item_id) references item(id))");
+        void createPullList() {
+            ExecuteStatement("create table pull_list(id integer not null auto_increment, " +
+                                                    "customer_id integer, " +
+                                                    "searchTerm_id integer, " +
+                                                    "number integer, " +
+                                                    "primary key(id), " +
+                                                    "foreign key (customer_id) references customer(id), "+
+                                                    "foreign key (searchTerm_id) references searchTerms(id))");
         }
 
+
         /**
-         * Some items in the item table do not physically exist and are based on customer requests.
-         * An example would be All Star Wars.
-         * This table maps items that do not physically exist to multiple items that do.
-         * In this case All Star Wars would map to all comic books related to Star Wars.
+         * Some search terms that customers use when describing what items they want are the same so
+         * various terms that mean the same thing are matched here.
          */
-        void createItemMapTable(){
-            ExecuteStatement("create table ItemMap(id integer not null auto_increment, " +
-                                                "wants integer, " +
-                                                "got integer, " +
+        void createSynonyms(){
+            ExecuteStatement("create table synonyms(id integer not null auto_increment, " +
+                                                "matched_id integer, " +
+                                                "sameAs_id integer, " +
                                                 "primary key(id), " +
-                                                "foreign key(wants) references item(id), " +
-                                                "foreign key(got) references item(id))");
+                                                "foreign key(matched_id) references searchTerms(id), " +
+                                                "foreign key(sameAs_id) references searchTerms(id))");
         }
 
         /**
-         * This stores items that are found on the pull list so they can later be printed.
+         * This stores the list of dates for the csv entries. This will also help determine new releases.
          */
-        void createPullItemTable(){
-            ExecuteStatement("create table pullItem(id integer not null auto_increment, " +
-                    "item_id integer, " +
-                    "pull_id integer, " +
-                    "primary key(id), " +
-                    "foreign key(item_id) references item(id), " +
-                    "foreign key(pull_id) references pull_list(id))");
+        void createCsvDates(){
+            ExecuteStatement("create table csvDates(id integer not null auto_increment, " +
+                    "csvDate date, " +
+                    "primary key(id))");
         }
 
         /**
-         * This provides a date to the pull list.
+         * This is the actual inventory of Dragon's Lair. All the entries from a csv file are parsed and placed here.
          */
-        void createPullDateTable(){
-            ExecuteStatement("create table pullDate(id integer not null auto_increment, " +
-                                                "pull_id integer, " +
-                                                "date date, " +
+        void createCsvEntries(){
+            ExecuteStatement("create table csvEntries(id integer not null auto_increment, " +
+                                                "title varchar(128), " +
+                                                "issue integer, " +
+                                                "graphicNovel integer, " +
+                                                "collection integer, " +
+                                                "nonBook integer, " +
+                                                "diamond integer, " +
+                                                "csv_id integer, " +
                                                 "primary key(id), " +
-                                                "foreign key (pull_id) references pull_list(id))");
+                                                "foreign key (csv_id) references csvDates(id), " +
+                                                "index a(diamond))");
         }
 
         /**
-         * For every item on the pull list, this provides the number or comics needed for each customer.
+         * Matches a customer with an item in inventory (csvEntries item) and how many they want.
          */
-        void createQuantityTable(){
-            ExecuteStatement("create table quantity(id integer not null auto_increment, " +
+        void createPulls(){
+            ExecuteStatement("create table pulls(id integer not null auto_increment, " +
                                                 "customer_id integer, " +
-                                                "pull_id integer, " +
-                                                "quantity integer, " +
+                                                "csvEntries_id integer, " +
+                                                "number integer, " +
                                                 "primary key(id), " +
                                                 "foreign key(customer_id) references customer(id), " +
-                                                "foreign key(pull_id) references pull_list(id))");
+                                                "foreign key(csvEntries_id) references csvEntries(id))");
         }
 
 
@@ -166,12 +171,13 @@ public class DB {
             ExecuteStatement("create database " + store);
             ExecuteStatement("use " + store);
             createCustomerTable();
-            createItemTable();
-            createPullListTable();
-            createItemMapTable();
-            createPullDateTable();
-            createPullItemTable();
-            createQuantityTable();
+            createCsvDates();
+            createSearchTerms();
+            createPullList();
+            createSynonyms();
+            createCsvEntries();
+            createPulls();
+
         }
 
         PreparedStatement prep = null;
@@ -584,8 +590,8 @@ public class DB {
      * @param diamondCode: The diamond code of the item used to identify it.
      * @return
      */
-    Boolean itemExists(String diamondCode) {
-        ResultSet theDiamond = db.ExecutePrepared("select diamond from item where diamond = ?", diamondCode);
+    Boolean csvEntryExists(String diamondCode) {
+        ResultSet theDiamond = db.ExecutePrepared("select diamond from csvEntries where diamond = ?", diamondCode);
         try { return theDiamond != null && theDiamond.next(); }
         catch (Exception e) {System.out.println(e);
         return false;
@@ -593,18 +599,41 @@ public class DB {
 }
 
     /**
-     * Inserts an item into the table if it hasn't already been inserted.
-     * @param itemName: The name of the item.
-     * @param diamondCode: The diamond code.
-     * @param store: The store the item is associated with.
+     *
+     * @param title The name of the item.
+     * @param diamondCode The identification for an item.
+     * @param issue The issue of the comic.
+     * @param graphicNovel Determines if it is a graphicNovel.
+     * @param collection Determines which collection the item is.
+     * @param nonBook Determines if the item is a book or not.
+     * @param csvId The date csv file was read in. The most recent date determines new releases.
+     * @param store
      */
-    public void insertItemTable(String itemName, String diamondCode, String store) {
-        if (!itemExists(diamondCode)) {
+    public void insertCsvEntries(String title, String diamondCode, String issue, String graphicNovel,
+                                 String collection, String nonBook, String csvId, String store) {
+        if (!csvEntryExists(diamondCode)) {
             db.ExecuteStatement("use " +  store);
-            db.ExecuteData("insert ignore into item(item,diamond) values(?,?)", itemName, diamondCode);
+            db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, collection, nonBook, diamond, csv_id) " +
+                    "values(?,?,?,?,?,?,?)", title, issue, graphicNovel, collection, nonBook, diamondCode,csvId);
         }
         else {
             System.out.println("skipped");
         }
     }
+
+    /**
+     * This method should be deleted immediately.
+     */
+    public void insertItemTable(String itemName, String diamondCode, String store) {
+
+        if (!csvEntryExists(diamondCode)) {
+            db.ExecuteStatement("use " + store);
+            db.ExecuteData("insert into csvEntries(title, diamond) " +
+                    "values(?,?)", itemName, diamondCode);
+        } else {
+            System.out.println("skipped");
+        }
+    }
+
+
 }
