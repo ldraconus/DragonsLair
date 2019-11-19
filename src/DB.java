@@ -370,7 +370,7 @@ public class DB {
     /**
      * Returns the id for a particular store.
      * @param store: The name of store for getting the id.
-     * @return
+     * @return id of store, -1 if unsuccessful.
      */
     public int GetStoreId(String store) {
         ResultSet data = db.ExecutePrepared("select id from admin.store where admin.store.name = ?", store);
@@ -474,12 +474,12 @@ public class DB {
 
     /**
      * Returns all the customers from the database.
-     * @return: A vector with all the customers.
+     * @return: A vector with all the customer names.
      */
     public Vector<String> GetCustomers() {
         Vector<String> customers = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
-        ResultSet data = db.ExecutePrepared("select name from customers");
+        ResultSet data = db.ExecutePrepared("select name from customer");
 
         try {
             if (data != null) {
@@ -497,7 +497,7 @@ public class DB {
      * Determines if a customer exists in the given store.
      * @param store: The store the customer visited.
      * @param customer: The name of the customer.
-     * @return
+     * @return true if customer exists, false otherwise.
      */
     public boolean CustomerExists(String store, String customer) {
         db.ExecuteStatement("use " + store);
@@ -526,7 +526,7 @@ public class DB {
      * Returns the customer's email.
      * @param store: The name of the store with the customer.
      * @param name: The name of the customer.
-     * @return
+     * @return Customer email, empty string otherwise
      */
     public String GetCustomerEMail(String store, String name) {
         db.ExecuteStatement("use " + store);
@@ -550,7 +550,7 @@ public class DB {
     public String GetCustomerPhone(String store, String name) {
         db.ExecuteStatement("use " + store);
         ResultSet r = db.ExecutePrepared("select customer.phone from ?.customer " +
-                "where customer.name = ? ", name);
+                "where customer.name = ? ", store, name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -588,7 +588,7 @@ public class DB {
     /**
      * Determines if an item exists.
      * @param diamondCode: The diamond code of the item used to identify it.
-     * @return
+     * @return true if the item exists, false otherwise.
      */
     Boolean csvEntryExists(String diamondCode) {
         ResultSet theDiamond = db.ExecutePrepared("select diamond from csvEntries where diamond = ?", diamondCode);
@@ -634,6 +634,4 @@ public class DB {
             System.out.println("skipped");
         }
     }
-
-
 }
