@@ -71,6 +71,21 @@ public class ManageComicsForm {
                 SetContext();
             }
         });
+
+        contentPanel.registerKeyboardAction(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Done();
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent we) { Done(); }
+        });
+
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowOpened(WindowEvent we) { Open(); }
+        });
     }
 
     /**
