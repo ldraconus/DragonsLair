@@ -86,7 +86,6 @@ public class DB {
                                                     "diamond varchar(100), " +
                                                     "issue integer, " +
                                                     "graphicNovel integer, " +
-                                                    "collection integer, " +
                                                     "nonBook integer, " +
                                                     "matches varchar(128), " +
         											"primary key(id))");
@@ -137,7 +136,6 @@ public class DB {
                                                 "title varchar(128), " +
                                                 "issue integer, " +
                                                 "graphicNovel integer, " +
-                                                "collection integer, " +
                                                 "nonBook integer, " +
                                                 "diamond varchar(20), " +
                                                 "csv_id integer, " +
@@ -602,21 +600,37 @@ public class DB {
      * @param diamondCode The identification for an item.
      * @param issue The issue of the comic.
      * @param graphicNovel Determines if it is a graphicNovel.
-     * @param collection Determines which collection the item is.
      * @param nonBook Determines if the item is a book or not.
      * @param csvId The date csv file was read in. The most recent date determines new releases.
      * @param store
      */
     public void insertCsvEntries(String title, String diamondCode, String issue, String graphicNovel,
-                                 String collection, String nonBook, String csvId, String store) {
+                                  String nonBook, String csvId, String store) {
 
         if (!csvEntryExists(diamondCode,store)) {
             db.ExecuteStatement("use " +  store);
-            db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, collection, nonBook, diamond, csv_id) " +
-                    "values(?,?,?,?,?,?,?)", title, issue, graphicNovel, collection, nonBook, diamondCode,csvId);
+            db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, nonBook, diamond, csv_id) " +
+                    "values(?,?,?,?,?,?)", title, issue, graphicNovel, nonBook, diamondCode,csvId);
         }
         else {
             System.out.println("skipped");
+        }
+    }
+
+    /**
+     * Determines if an item exists.
+     * @param date The date to check for existence.
+     * @param store The store to check in.
+     * @return
+     */
+    Boolean csvDateExists(String date, String store) {
+        db.ExecuteStatement("use " + store);
+        ResultSet theCSVDate = db.ExecutePrepared("select csvDate from csvDates where csvDate = ?", date);
+        try {
+            return theCSVDate != null && theCSVDate.next();
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
         }
     }
 

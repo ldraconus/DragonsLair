@@ -133,7 +133,9 @@ public class CSV
                     }
                     String formattedDate = year + "-" + month + "-" + day;
 
-                    Data.DB().insertCsvDates(formattedDate, Data.Store());
+                    if (!Data.DB().csvDateExists(formattedDate, Data.Store())) {
+                        Data.DB().insertCsvDates(formattedDate, Data.Store());
+                    }
                     csvIdDate = Data.DB().getCsvDateId(Data.Store(), formattedDate);
 
                     System.out.printf("Date: %s. CSVIDDate: %s\n", formattedDate, csvIdDate);
@@ -169,7 +171,7 @@ public class CSV
                             nonBook = "1";
                     }
 
-                    Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, collection, nonBook, csvIdDate, store);
+                    Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, nonBook, csvIdDate, store);
                 }
             }
             System.out.printf("Length of file: %d\n", length - 4);
