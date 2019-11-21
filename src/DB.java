@@ -530,8 +530,8 @@ public class DB {
      */
     public String GetCustomerEMail(String store, String name) {
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select customer.email from customer " +
-                "where customer.name = ? ", name);
+        ResultSet r = db.ExecutePrepared("select email from customer " +
+                "where name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -549,8 +549,8 @@ public class DB {
      */
     public String GetCustomerPhone(String store, String name) {
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select customer.phone from ?.customer " +
-                "where customer.name = ? ", name);
+        ResultSet r = db.ExecutePrepared("select phone from customer " +
+                "where name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -654,8 +654,8 @@ public class DB {
      */
     public String getCsvDateId(String store, String date){
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select csvDates.csvDate from ?.csvDates " +
-                "where csvDates.csvDate = ? ",store, date);
+        ResultSet r = db.ExecutePrepared("select id from csvDates " +
+                "where csvDate = ? ", date);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
