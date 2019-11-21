@@ -171,7 +171,7 @@ public class CSV
                             nonBook = "1";
                     }
 
-                    Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, collection, nonBook, csvIdDate, store);
+                    Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, nonBook, csvIdDate, store);
                 }
             }
             System.out.printf("Length of file: %d\n", length - 4);
