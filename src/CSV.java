@@ -127,10 +127,11 @@ public class CSV
                 if (length > 4) {
                     String title = fullLine[2].replaceAll("\"", "");
                     String diamondCode = fullLine[1].replaceAll("\"", "").replaceAll(" ", "");
+                    int catCode = Integer.parseInt(fullLine[6].replaceAll("\"", ""));
                     String issue = null;
-                    String graphicNovel = null;
-                    String collection = null;
-                    String nonBook = null;
+                    String graphicNovel = "0";
+                    String collection = "0";
+                    String nonBook = "0";
                     String csvID = null;
                     String store = Data.Store();
                     int issueLocation = fullLine[2].indexOf('#');
@@ -141,6 +142,19 @@ public class CSV
                         issue = issue.substring(0, issue.indexOf(' '));
                         issue = issue.replaceAll("\"", "");
                     }
+                    switch (catCode)
+                    {
+                        case 1: case 2: case 4:
+                            break;
+
+                        case 3:
+                            graphicNovel = "1";
+                            break;
+
+                        default:
+                            nonBook = "1";
+                    }
+
                     Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, collection, nonBook, csvID, store);
                 }
             }
