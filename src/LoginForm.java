@@ -118,7 +118,7 @@ public class LoginForm {
         Read prefread = new Read();
         prefread.readFile();
         if (prefread.readFile()) {
-            System.out.println("DB Location: " + prefread.getDir() + " DB Username: " + prefread.getUser() + " DB Password: " + prefread.getPW());
+            //System.out.println("DB Location: " + prefread.getDir() + " DB Username: " + prefread.getUser() + " DB Password: " + prefread.getPW());
             Display();
         }
         else {

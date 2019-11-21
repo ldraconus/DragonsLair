@@ -69,7 +69,7 @@ public class ManageCustomersForm {
         searchTextField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent keyEvent) {
-                searchCustomers();
+
             }
 
             @Override
@@ -80,6 +80,7 @@ public class ManageCustomersForm {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 /* ignore */
+                searchCustomers();
             }
         });
 
@@ -199,14 +200,16 @@ public class ManageCustomersForm {
         Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + origCustomer + "?");
         if (msg.getButton() == Message.NoButton) return;
         Data.DB().DeleteCustomer(Data.Store(), origCustomer);
+        customers = Data.DB().GetCustomers();
+        SetCustomerList(customers);
+        SetContext();
     }
 
     /**
      * Hide the frame.
      */
-    private void Done() {
-        frame.setVisible(false);
-    }
+    //private void Done() {frame.setVisible(false);}
+    private void Done() {frame.dispose();}
 
     /**
      * Set the context.
