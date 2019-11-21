@@ -142,7 +142,7 @@ public class DB {
                                                 "graphicNovel integer, " +
                                                 "collection integer, " +
                                                 "nonBook integer, " +
-                                                "diamond varchar(100), " +
+                                                "diamond varchar(20), " +
                                                 "csv_id integer, " +
                                                 "primary key(id), " +
                                                 "foreign key (csv_id) references csvDates(id), " +
@@ -370,7 +370,7 @@ public class DB {
     /**
      * Returns the id for a particular store.
      * @param store: The name of store for getting the id.
-     * @return id of store, -1 if unsuccessful.
+     * @return
      */
     public int GetStoreId(String store) {
         ResultSet data = db.ExecutePrepared("select id from admin.store where admin.store.name = ?", store);
@@ -474,12 +474,12 @@ public class DB {
 
     /**
      * Returns all the customers from the database.
-     * @return: A vector with all the customer names.
+     * @return: A vector with all the customers.
      */
     public Vector<String> GetCustomers() {
         Vector<String> customers = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
-        ResultSet data = db.ExecutePrepared("select name from customer");
+        ResultSet data = db.ExecutePrepared("select name from customers");
 
         try {
             if (data != null) {
@@ -497,7 +497,7 @@ public class DB {
      * Determines if a customer exists in the given store.
      * @param store: The store the customer visited.
      * @param customer: The name of the customer.
-     * @return true if customer exists, false otherwise.
+     * @return
      */
     public boolean CustomerExists(String store, String customer) {
         db.ExecuteStatement("use " + store);
@@ -526,7 +526,7 @@ public class DB {
      * Returns the customer's email.
      * @param store: The name of the store with the customer.
      * @param name: The name of the customer.
-     * @return Customer email, empty string otherwise
+     * @return
      */
     public String GetCustomerEMail(String store, String name) {
         db.ExecuteStatement("use " + store);
@@ -550,7 +550,7 @@ public class DB {
     public String GetCustomerPhone(String store, String name) {
         db.ExecuteStatement("use " + store);
         ResultSet r = db.ExecutePrepared("select customer.phone from ?.customer " +
-                "where customer.name = ? ", store, name);
+                "where customer.name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -588,7 +588,7 @@ public class DB {
     /**
      * Determines if an item exists.
      * @param diamondCode: The diamond code of the item used to identify it.
-     * @return true if the item exists, false otherwise.
+     * @return
      */
     Boolean csvEntryExists(String diamondCode, String store) {
         db.ExecuteStatement("use " + store);
@@ -612,7 +612,8 @@ public class DB {
      */
     public void insertCsvEntries(String title, String diamondCode, String issue, String graphicNovel,
                                  String collection, String nonBook, String csvId, String store) {
-        if (!csvEntryExists(diamondCode, store)) {
+
+        if (!csvEntryExists(diamondCode,store)) {
             db.ExecuteStatement("use " +  store);
             db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, collection, nonBook, diamond, csv_id) " +
                     "values(?,?,?,?,?,?,?)", title, issue, graphicNovel, collection, nonBook, diamondCode,csvId);
@@ -627,7 +628,7 @@ public class DB {
      */
     public void insertItemTable(String itemName, String diamondCode, String store) {
 
-        if (!csvEntryExists(diamondCode, store)) {
+        if (!csvEntryExists(diamondCode,store)) {
             db.ExecuteStatement("use " + store);
             db.ExecuteData("insert into csvEntries(title, diamond) " +
                     "values(?,?)", itemName, diamondCode);
@@ -637,23 +638,63 @@ public class DB {
     }
 
     /**
-     * Returns all the customers from the database.
-     * @return: A vector with all the customer names.
+     *
+     * @param date The date of a particular csv entry
+     * @param store The store being used.
      */
-    public Vector<String> GetComics() {
-        Vector<String> comics = new Vector<>();
+    public void insertCsvDates(String date,String store){
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into csvDates(csvDate) " + "values(?)", date);
+    }
+
+    /**
+     *
+     * @param store The store being used.
+     * @param date The date of the csv we want.
+     * @return
+     */
+    public String getCsvDateId(String store, String date){
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select csvDates.csvDate from ?.csvDates " +
+                "where csvDates.csvDate = ? ", date);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("csvDates.id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Grabs all the names of the csvEntries
+     * @return
+     */
+    public Vector<String> getCsvEntries() {
+        Vector<String> csvEntries = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
-        ResultSet data = db.ExecutePrepared("select name from csvEntries");
+        ResultSet data = db.ExecutePrepared("select title from csvEntries");
 
         try {
             if (data != null) {
                 while (data.next()) {
-                    comics.add(data.getString("name"));
+                    csvEntries.add(data.getString("title"));
                 }
             }
+        } catch (Exception e) {
+            System.out.println(e);
         }
-        catch(Exception e) { System.out.println(e); }
 
-        return comics;
+        return csvEntries;
+    }
+
+    /**
+     * Deletes a customer from the database.
+     * @param store: The store the customer is from.
+     * @param diamond: The diamond code of the csv entry.
+     */
+    public void deleteCsvEntry(String store, String diamond) {
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("delete from csvEntry where diamond=?", diamond);
     }
 }
