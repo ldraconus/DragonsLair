@@ -78,7 +78,7 @@ public class ManageComicsForm {
      */
     private void Open() {
         comicList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        comics = Data.DB().GetComics();
+        comics = Data.DB().getCsvEntries();
         SetCustomerList(comics);
         SetContext();
         frame.setVisible(true);
@@ -129,7 +129,7 @@ public class ManageComicsForm {
         String selectedComic = comicList.getSelectedValue();
         Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + selectedComic + "?");
         if (msg.getButton() == Message.NoButton) return;
-        Data.DB().DeleteComic(Data.Store(), selectedComic);
+        Data.DB().deleteCsvEntry(Data.Store(), selectedComic);
         Open();
     }
 
