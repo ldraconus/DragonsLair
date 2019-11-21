@@ -612,6 +612,7 @@ public class DB {
      */
     public void insertCsvEntries(String title, String diamondCode, String issue, String graphicNovel,
                                  String collection, String nonBook, String csvId, String store) {
+
         if (!csvEntryExists(diamondCode,store)) {
             db.ExecuteStatement("use " +  store);
             db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, collection, nonBook, diamond, csv_id) " +
@@ -696,6 +697,4 @@ public class DB {
         db.ExecuteStatement("use " + store);
         db.ExecuteData("delete from csvEntry where diamond=?", diamond);
     }
-
-
 }

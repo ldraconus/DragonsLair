@@ -69,7 +69,7 @@ public class ManageCustomersForm {
         searchTextField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent keyEvent) {
-                searchCustomers();
+
             }
 
             @Override
@@ -80,6 +80,7 @@ public class ManageCustomersForm {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 /* ignore */
+                searchCustomers();
             }
         });
 
