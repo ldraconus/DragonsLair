@@ -7,7 +7,7 @@ public class PrintReports {
     private JButton singleCustomer;
     private JButton newReleases;
     private JButton allTitles;
-    private JButton cancelButton;
+    private JButton doneButton;
 
     private static JFrame frame = null;
 
@@ -36,7 +36,7 @@ public class PrintReports {
                 allTitles();
             }
         });
-        cancelButton.addActionListener(new ActionListener() {
+        doneButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Done();

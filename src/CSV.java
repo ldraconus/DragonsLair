@@ -109,6 +109,8 @@ public class CSV
      */
     public void openFile(String location) {
         String line = "";
+        String[] date;
+        String csvIdDate = null;
 
         try {
             reader = new BufferedReader(new FileReader(location));
@@ -118,10 +120,58 @@ public class CSV
 
                 String[] fullLine = line.split(",");
 
+                if (length == 4) {
+                    date = fullLine[0].split("/");
+                    String month = date[0].replaceAll("\"","");
+                    String day = date[1].replaceAll("\"","");
+                    String year = "20" + date[2].replaceAll("\"", "");
+                    if (month.length() < 2) {
+                        month = "0" + month;
+                    }
+                    if (day.length() < 2) {
+                        day = "0" + day;
+                    }
+                    String formattedDate = year + "-" + month + "-" + day;
+
+                    if (!Data.DB().csvDateExists(formattedDate, Data.Store())) {
+                        Data.DB().insertCsvDates(formattedDate, Data.Store());
+                    }
+                    csvIdDate = Data.DB().getCsvDateId(Data.Store(), formattedDate);
+
+                    System.out.printf("Date: %s. CSVIDDate: %s\n", formattedDate, csvIdDate);
+                }
+
                 if (length > 4) {
-                    System.out.printf("Diamond Number: '%s'\tName: %-60.60s", fullLine[1], fullLine[2]);
-                    System.out.println();
-                    Data.DB().insertItemTable(fullLine[2].replaceAll("\"", ""), fullLine[1].replaceAll("\"",""), Data.Store());
+                    String title = fullLine[2].replaceAll("\"", "");
+                    String diamondCode = fullLine[1].replaceAll("\"", "").replaceAll(" ", "");
+                    int catCode = Integer.parseInt(fullLine[6].replaceAll("\"", ""));
+                    String issue = null;
+                    String graphicNovel = "0";
+                    String collection = "0";
+                    String nonBook = "0";
+                    String store = Data.Store();
+                    int issueLocation = fullLine[2].indexOf('#');
+                    if (issueLocation > -1) {
+                        issueLocation += 1;
+                        issue = fullLine[2].substring(issueLocation);
+                        issue = issue + " ";
+                        issue = issue.substring(0, issue.indexOf(' '));
+                        issue = issue.replaceAll("\"", "");
+                    }
+                    switch (catCode)
+                    {
+                        case 1: case 2: case 4:
+                            break;
+
+                        case 3:
+                            graphicNovel = "1";
+                            break;
+
+                        default:
+                            nonBook = "1";
+                    }
+
+                    Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, nonBook, csvIdDate, store);
                 }
             }
             System.out.printf("Length of file: %d\n", length - 4);
