@@ -72,7 +72,7 @@ public class ManageComicsForm {
             }
         });
 
-        contentPanel.registerKeyboardAction(new ActionListener() {
+        manageComicsPanel.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Done();
             }

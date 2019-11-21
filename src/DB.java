@@ -479,7 +479,7 @@ public class DB {
     public Vector<String> GetCustomers() {
         Vector<String> customers = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
-        ResultSet data = db.ExecutePrepared("select name from customers");
+        ResultSet data = db.ExecutePrepared("select name from customer");
 
         try {
             if (data != null) {
