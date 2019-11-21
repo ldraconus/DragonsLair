@@ -109,6 +109,7 @@ public class CSV
      */
     public void openFile(String location) {
         String line = "";
+        String date = "";
 
         try {
             reader = new BufferedReader(new FileReader(location));
@@ -118,10 +119,29 @@ public class CSV
 
                 String[] fullLine = line.split(",");
 
+                if (length == 4) {
+                    date = fullLine[0].replaceAll("\"", "");
+                    System.out.printf("File Date: %s\n", date);
+                }
+
                 if (length > 4) {
-                    System.out.printf("Diamond Number: '%s'\tName: %-60.60s", fullLine[1], fullLine[2]);
-                    System.out.println();
-                    Data.DB().insertItemTable(fullLine[2].replaceAll("\"", ""), fullLine[1].replaceAll("\"",""), Data.Store());
+                    String title = fullLine[2].replaceAll("\"", "");
+                    String diamondCode = fullLine[1].replaceAll("\"", "").replaceAll(" ", "");
+                    String issue = null;
+                    String graphicNovel = null;
+                    String collection = null;
+                    String nonBook = null;
+                    String csvID = null;
+                    String store = Data.Store();
+                    int issueLocation = fullLine[2].indexOf('#');
+                    if (issueLocation > -1) {
+                        issueLocation += 1;
+                        issue = fullLine[2].substring(issueLocation);
+                        issue = issue + " ";
+                        issue = issue.substring(0, issue.indexOf(' '));
+                        issue = issue.replaceAll("\"", "");
+                    }
+                    Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, collection, nonBook, csvID, store);
                 }
             }
             System.out.printf("Length of file: %d\n", length - 4);

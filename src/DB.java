@@ -91,7 +91,7 @@ public class DB {
                                                     "graphicNovel integer, " +
                                                     "collection integer, " +
                                                     "nonBook integer, " +
-                                                    "match varchar(128), " +
+                                                    "matches varchar(128), " +
         											"primary key(id))");
         }
 
@@ -142,7 +142,7 @@ public class DB {
                                                 "graphicNovel integer, " +
                                                 "collection integer, " +
                                                 "nonBook integer, " +
-                                                "diamond integer, " +
+                                                "diamond varchar(100), " +
                                                 "csv_id integer, " +
                                                 "primary key(id), " +
                                                 "foreign key (csv_id) references csvDates(id), " +
@@ -590,7 +590,8 @@ public class DB {
      * @param diamondCode: The diamond code of the item used to identify it.
      * @return true if the item exists, false otherwise.
      */
-    Boolean csvEntryExists(String diamondCode) {
+    Boolean csvEntryExists(String diamondCode, String store) {
+        db.ExecuteStatement("use " + store);
         ResultSet theDiamond = db.ExecutePrepared("select diamond from csvEntries where diamond = ?", diamondCode);
         try { return theDiamond != null && theDiamond.next(); }
         catch (Exception e) {System.out.println(e);
@@ -611,7 +612,7 @@ public class DB {
      */
     public void insertCsvEntries(String title, String diamondCode, String issue, String graphicNovel,
                                  String collection, String nonBook, String csvId, String store) {
-        if (!csvEntryExists(diamondCode)) {
+        if (!csvEntryExists(diamondCode, store)) {
             db.ExecuteStatement("use " +  store);
             db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, collection, nonBook, diamond, csv_id) " +
                     "values(?,?,?,?,?,?,?)", title, issue, graphicNovel, collection, nonBook, diamondCode,csvId);
@@ -626,12 +627,33 @@ public class DB {
      */
     public void insertItemTable(String itemName, String diamondCode, String store) {
 
-        if (!csvEntryExists(diamondCode)) {
+        if (!csvEntryExists(diamondCode, store)) {
             db.ExecuteStatement("use " + store);
             db.ExecuteData("insert into csvEntries(title, diamond) " +
                     "values(?,?)", itemName, diamondCode);
         } else {
             System.out.println("skipped");
         }
+    }
+
+    /**
+     * Returns all the customers from the database.
+     * @return: A vector with all the customer names.
+     */
+    public Vector<String> GetComics() {
+        Vector<String> comics = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select name from csvEntries");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    comics.add(data.getString("name"));
+                }
+            }
+        }
+        catch(Exception e) { System.out.println(e); }
+
+        return comics;
     }
 }
