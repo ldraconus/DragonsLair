@@ -1,9 +1,6 @@
 //import org.jetbrains.annotations.NotNull;
 
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Vector;
 
 //import com.sun.istack.internal.NotNull;
@@ -530,8 +527,8 @@ public class DB {
      */
     public String GetCustomerEMail(String store, String name) {
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select customer.email from customer " +
-                "where customer.name = ? ", name);
+        ResultSet r = db.ExecutePrepared("select email from customer " +
+                "where name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -549,8 +546,8 @@ public class DB {
      */
     public String GetCustomerPhone(String store, String name) {
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select customer.phone from ?.customer " +
-                "where customer.name = ? ", name);
+        ResultSet r = db.ExecutePrepared("select phone from customer " +
+                "where name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -624,20 +621,6 @@ public class DB {
     }
 
     /**
-     * This method should be deleted immediately.
-     */
-    public void insertItemTable(String itemName, String diamondCode, String store) {
-
-        if (!csvEntryExists(diamondCode,store)) {
-            db.ExecuteStatement("use " + store);
-            db.ExecuteData("insert into csvEntries(title, diamond) " +
-                    "values(?,?)", itemName, diamondCode);
-        } else {
-            System.out.println("skipped");
-        }
-    }
-
-    /**
      *
      * @param date The date of a particular csv entry
      * @param store The store being used.
@@ -653,14 +636,13 @@ public class DB {
      * @param date The date of the csv we want.
      * @return
      */
-    public String getCsvDateId(String store, String date){
+    public String getCsvDateId(String store, String date)  {
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select csvDates.csvDate from ?.csvDates " +
-                "where csvDates.csvDate = ? ", date);
+        ResultSet r = db.ExecutePrepared("select id from csvDates where csvDate = ?", date);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
-            return r.getString("csvDates.id");
+            return r.getString("id");
         }
         catch (Exception e) { System.out.println(e); }
         return "";
@@ -695,6 +677,6 @@ public class DB {
      */
     public void deleteCsvEntry(String store, String diamond) {
         db.ExecuteStatement("use " + store);
-        db.ExecuteData("delete from csvEntry where diamond=?", diamond);
+        db.ExecuteData("delete from csvEntries where diamond=?", diamond);
     }
 }
