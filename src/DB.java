@@ -479,7 +479,7 @@ public class DB {
     public Vector<String> GetCustomers() {
         Vector<String> customers = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
-        ResultSet data = db.ExecutePrepared("select name from customers");
+        ResultSet data = db.ExecutePrepared("select name from customer");
 
         try {
             if (data != null) {
@@ -655,7 +655,7 @@ public class DB {
     public String getCsvDateId(String store, String date){
         db.ExecuteStatement("use " + store);
         ResultSet r = db.ExecutePrepared("select csvDates.csvDate from ?.csvDates " +
-                "where csvDates.csvDate = ? ", date);
+                "where csvDates.csvDate = ? ",store, date);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -694,8 +694,7 @@ public class DB {
      */
     public void deleteCsvEntry(String store, String diamond) {
         db.ExecuteStatement("use " + store);
-        db.ExecuteData("delete from csvEntry where diamond=?", diamond);
+        db.ExecuteData("delete from csvEntries where diamond=?", diamond);
     }
-
 
 }
