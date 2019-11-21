@@ -621,6 +621,23 @@ public class DB {
     }
 
     /**
+     * Determines if an item exists.
+     * @param date The date to check for existence.
+     * @param store The store to check in.
+     * @return
+     */
+    Boolean csvDateExists(String date, String store) {
+        db.ExecuteStatement("use " + store);
+        ResultSet theCSVDate = db.ExecutePrepared("select csvDate from csvDates where csvDate = ?", date);
+        try {
+            return theCSVDate != null && theCSVDate.next();
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+    }
+
+    /**
      *
      * @param date The date of a particular csv entry
      * @param store The store being used.

@@ -133,7 +133,9 @@ public class CSV
                     }
                     String formattedDate = year + "-" + month + "-" + day;
 
-                    Data.DB().insertCsvDates(formattedDate, Data.Store());
+                    if (!Data.DB().csvDateExists(formattedDate, Data.Store())) {
+                        Data.DB().insertCsvDates(formattedDate, Data.Store());
+                    }
                     csvIdDate = Data.DB().getCsvDateId(Data.Store(), formattedDate);
 
                     System.out.printf("Date: %s. CSVIDDate: %s\n", formattedDate, csvIdDate);
