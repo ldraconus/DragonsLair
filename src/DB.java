@@ -693,4 +693,72 @@ public class DB {
         db.ExecuteStatement("use " + store);
         db.ExecuteData("delete from csvEntries where diamond=?", diamond);
     }
+
+    /**
+     * This is the first step in the pull processing. Pulls all the csv entries based on the date id.
+     * @param store: The store the csv entries are from.
+     * @param date: The date the user searches by.
+     * @return: a vector of all the csv entries that are from a certain date.
+     */
+    public Vector<String> getCsvEntriesByDate(String store, String date){
+        db.ExecuteStatement("use " + store);
+        String date_id = getCsvDateId(store,date);
+        ResultSet data = db.ExecutePrepared("select * from csvEntries where csv_id = ?", date_id);
+        Vector<String> csvEntries = new Vector<>();
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("id"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Returns the result of joining searchTerms with synonyms based on id.
+     * This is step 7 and 8 in the pull processing text.
+     * @param store
+     * @return
+     */
+    public ResultSet getJoinedMatches(String store){
+        db.ExecuteStatement("use " + store);
+        Vector<String> matches = new Vector<String>();
+        ResultSet data = db.ExecutePrepared("select * from synonyms, searchTerms where synonyms.match_id = searchTerms.id");
+        return data;
+    }
+
+    /**
+     * Grabs records the records where sameAsId = searchTermsId
+     * @param store: The store the records are from.
+     * @param data: The table from getJoinedMatches.
+     * @return
+     */
+    public Vector<Integer> getMatchSearchTerms(String store, ResultSet data){
+        db.ExecuteStatement("use " + store);
+        ResultSet searchTerms = db.ExecutePrepared("select * from searchTerms");
+        Vector<Integer> matches = new Vector<Integer>();
+        int searchTermId;
+        int dataId;
+
+        try {
+            if (data != null) {
+                while (data.next() && searchTerms.next()) {
+                    searchTermId = searchTerms.getInt("id");
+                    dataId = data.getInt("sameAs_id");
+                    if(searchTermId == dataId){
+                        matches.add(searchTermId);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return matches;
+    }
+
 }
