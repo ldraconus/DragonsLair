@@ -113,7 +113,7 @@ public class ManageCustomersForm {
             return;
         }
         Vector<String> filtered = new Vector<String>();
-        for (String c: customers) if (c.contains(text)) filtered.addElement(c);
+        for (String c: customers) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
         SetCustomerList(filtered);
         SetContext();
     }
