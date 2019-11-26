@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.io.*;
 import java.util.Scanner;
 import java.util.Vector;
@@ -13,8 +14,11 @@ public class CSVRead {
     File csvFile;
     BufferedReader reader = null;
     String store;
+    boolean Windows;
 
-    public CSVRead() {}
+    public CSVRead(boolean isWindows) {
+        Windows = isWindows;
+    }
 
     private static Scanner input = new Scanner(System.in);
 
@@ -108,7 +112,12 @@ public class CSVRead {
     public boolean getFile() {
         System.out.print("Customer file to open: ");
         fileLocation = input.nextLine();
-        lastSlash = fileLocation.lastIndexOf("/");
+        if (Windows) {
+            lastSlash = fileLocation.lastIndexOf("\\");
+        }
+        else {
+            lastSlash = fileLocation.lastIndexOf("/");
+        }
         directory = fileLocation.substring(0, lastSlash);
         extension = fileLocation.lastIndexOf(".");
         extensionType = fileLocation.substring(extension + 1);
