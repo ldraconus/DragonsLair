@@ -62,7 +62,7 @@ public class ManageComicsForm {
         searchTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                searchCustomers();
+                searchComics();
             }
         });
         comicList.addListSelectionListener(new ListSelectionListener() {
@@ -94,7 +94,7 @@ public class ManageComicsForm {
     private void Open() {
         comicList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         comics = Data.DB().getCsvEntries();
-        SetCustomerList(comics);
+        SetComicList(comics);
         SetContext();
         frame.setVisible(true);
     }
@@ -103,7 +103,7 @@ public class ManageComicsForm {
      * Set the comic list.
      * @param comics Used for filtering.
      */
-    private void SetCustomerList(Vector<String> comics) {
+    private void SetComicList(Vector<String> comics) {
         comicList.clearSelection();
         DefaultListModel<String> data = new DefaultListModel<String>();
         for (String comic: comics) data.addElement(comic);
@@ -122,16 +122,16 @@ public class ManageComicsForm {
     /**
      * Search filter
      */
-    private void searchCustomers() {
+    private void searchComics() {
         String text = searchTextField.getText();
         if (text.isEmpty()) {
-            SetCustomerList(comics);
+            SetComicList(comics);
             SetContext();
             return;
         }
         Vector<String> filtered = new Vector();
-        for (String comic: comics) if (comic.contains(text)) filtered.addElement(comic);
-        SetCustomerList(filtered);
+        for (String comic: comics) if (comic.toLowerCase().contains(text.toLowerCase())) filtered.addElement(comic);
+        SetComicList(filtered);
         SetContext();
     }
 
