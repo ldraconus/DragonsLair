@@ -1,6 +1,10 @@
+import javafx.scene.control.TableSelectionModel;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
 
@@ -10,12 +14,13 @@ public class ManageComicsForm {
     private JButton deleteButton;
     private JButton addButton;
     private JButton editButton;
-    private JList<String> comicList;
     private JButton doneButton;
+    private JTable comicTable;
 
     private static JFrame frame = null;
 
-    private Vector<String> comics;
+    DefaultTableModel defaultModel;
+    private Vector<Comic> comics;
 
     public static void Dispose() { // dispose sub windows
         if (frame != null) frame.dispose();
@@ -59,13 +64,15 @@ public class ManageComicsForm {
                 Done();
             }
         });
+
         searchTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                searchCustomers();
+                //searchComics();
             }
         });
-        comicList.addListSelectionListener(new ListSelectionListener() {
+
+        comicTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 SetContext();
@@ -92,22 +99,20 @@ public class ManageComicsForm {
      * Get and set the customer list.
      */
     private void Open() {
-        comicList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        comics = Data.DB().getCsvEntries();
-        SetCustomerList(comics);
+        String[] columns = {"Comic name","Diamond Code"};
+        defaultModel = new DefaultTableModel(columns, 0);
+        comicTable.setModel(defaultModel);
+
+        // Retrieve comics from the database and add them to the table model
+        comics = Data.DB().getCSVEntries();
+        for(Comic c : comics){
+            Object[] rowData = {c.getTitle(), c.getDiamondCode()};
+            defaultModel.addRow(rowData);
+        }
+
+        comicTable.setVisible(true);
         SetContext();
         frame.setVisible(true);
-    }
-
-    /**
-     * Set the comic list.
-     * @param comics Used for filtering.
-     */
-    private void SetCustomerList(Vector<String> comics) {
-        comicList.clearSelection();
-        DefaultListModel<String> data = new DefaultListModel<String>();
-        for (String comic: comics) data.addElement(comic);
-        comicList.setModel(data);
     }
 
     /**
@@ -115,37 +120,41 @@ public class ManageComicsForm {
      */
     private void SetContext() {
         addButton.setEnabled(true);
-        deleteButton.setEnabled(!comicList.isSelectionEmpty());
-        editButton.setEnabled(!comicList.isSelectionEmpty());
+        deleteButton.setEnabled(!comicTable.getSelectionModel().isSelectionEmpty());
+        editButton.setEnabled(!comicTable.getSelectionModel().isSelectionEmpty());
     }
 
     /**
-     * Search filter
+     *  [CHANGES NEED] : Search filter
      */
-    private void searchCustomers() {
+    /*
+    private void searchComics() {
         String text = searchTextField.getText();
         if (text.isEmpty()) {
-            SetCustomerList(comics);
+            SetComicList(comics);
             SetContext();
             return;
         }
         Vector<String> filtered = new Vector();
-        for (String comic: comics) if (comic.contains(text)) filtered.addElement(comic);
-        SetCustomerList(filtered);
+        for (String comic: comics) if (comic.toLowerCase().contains(text.toLowerCase())) filtered.addElement(comic);
+        SetComicList(filtered);
         SetContext();
-    }
+    }*/
 
     /**
      * Delete customer.
      */
     private void Delete() {
-        boolean selected = !comicList.isSelectionEmpty();
-        if (!selected) return;
-        String selectedComic = comicList.getSelectedValue();
-        Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + selectedComic + "?");
+        if(comicTable.getSelectionModel().isSelectionEmpty())
+            return;
+        
+        int selectedRow = comicTable.getSelectedRow();
+        String comicTitle = comicTable.getModel().getValueAt(selectedRow, 0).toString();
+        String diamondCode = comicTable.getModel().getValueAt(selectedRow, 1).toString();
+        Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + comicTitle + "?");
         if (msg.getButton() == Message.NoButton) return;
-        Data.DB().deleteCsvEntry(Data.Store(), selectedComic);
-        Open();
+        Data.DB().deleteCsvEntry(Data.Store(), diamondCode);
+        ((DefaultTableModel)comicTable.getModel()).removeRow(selectedRow);
     }
 
     private void Done() {

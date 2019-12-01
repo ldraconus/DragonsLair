@@ -702,6 +702,24 @@ public class DB {
         return csvEntries;
     }
 
+    public Vector<Comic> getCSVEntries(){
+        Vector<Comic> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select * from csvEntries");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(new Comic(data.getString("title"), data.getString("diamond")));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
     /**
      * Deletes a csv entry from the database.
      * @param store: The store the customer is from.
