@@ -618,6 +618,24 @@ public class DB {
     }
 
     /**
+     * Gets a csv entry id by the title.
+     * @param store: The store the csv entry resides in.
+     * @param title: The name of the item.
+     * @return: The id of the item.
+     */
+    public String getCsvEntryId(String store, String title){
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select id from csvEntries where title = ?", title);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
      * Determines if an item exists.
      * @param date The date to check for existence.
      * @param store The store to check in.
@@ -685,7 +703,7 @@ public class DB {
     }
 
     /**
-     * Deletes a customer from the database.
+     * Deletes a csv entry from the database.
      * @param store: The store the customer is from.
      * @param diamond: The diamond code of the csv entry.
      */
@@ -733,7 +751,7 @@ public class DB {
     }
 
     /**
-     * Grabs records the records where sameAsId = searchTermsId
+     * Grabs the records where sameAsId = searchTermsId
      * @param store: The store the records are from.
      * @param data: The table from getJoinedMatches.
      * @return
@@ -759,6 +777,65 @@ public class DB {
             System.out.println(e);
         }
         return matches;
+    }
+
+    /**
+     * Inserting into the searchTerms.
+     * @param store: The store being used.
+     * @param name: The name of the item the customer wants (customer jargon).
+     * @param diamond: The diamond code.
+     * @param issue: The issue number.
+     * @param graphicNovel: Determines if the item is a graphic novel.
+     * @param nonBook: Determines if the item is a book.
+     * @param matches: The actual name of the item that Dragon's Lair has.
+     */
+    public void insertSearchTerms(String store, String name, String diamond, String issue, String graphicNovel,
+                                  String nonBook, String matches){
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into searchTerms(name,diamond,issue,graphicNovel,nonBook,matches) " + "values(?,?,?,?,?,?)",
+                name, diamond, issue, graphicNovel,nonBook,matches);
+    }
+
+    /**
+     * Returns the id of a particular search term.
+     * @param store: The store the search term is associated with.
+     * @param name: The name of the search term.
+     * @return: The id of the search term.
+     */
+    public String getSearchTermId(String store, String name){
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select id from searchTerms where name = ?", name);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Inserts into the pull_list
+     * @param store: The store being used.
+     * @param customerId: The id of the customer getting an item.
+     * @param searchTermId: The id of the customer's search term.
+     * @param number: The number of items of searchTermId the customer is getting.
+     */
+    public void insertPullList(String store, String customerId, String searchTermId, String number){
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into pull_list(customer_id, searchTerm_id, number) " + "values(?,?,?)",
+                customerId, searchTermId, number);
+    }
+
+    /**
+     * Inserts a synonym into the synonyms table.
+     * @param store: The name of the store.
+     * @param matchId: The actual item id Dragon's Lair has.
+     * @param sameAsId: The customer's search term id.
+     */
+    public void insertSynonyms(String store, String matchId, String sameAsId){
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into synonyms(matched_id, sameAs_id) " + "values(?,?)", matchId, sameAsId);
     }
 
 }
