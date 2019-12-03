@@ -618,24 +618,6 @@ public class DB {
     }
 
     /**
-     * Gets a csv entry id by the title.
-     * @param store: The store the csv entry resides in.
-     * @param title: The name of the item.
-     * @return: The id of the item.
-     */
-    public String getCsvEntryId(String store, String title){
-        db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select id from csvEntries where title = ?", title);
-        if (r == null) return "";
-        try {
-            if (!r.next()) return "";
-            return r.getString("id");
-        }
-        catch (Exception e) { System.out.println(e); }
-        return "";
-    }
-
-    /**
      * Determines if an item exists.
      * @param date The date to check for existence.
      * @param store The store to check in.
@@ -702,26 +684,8 @@ public class DB {
         return csvEntries;
     }
 
-    public Vector<Comic> getCSVEntries(){
-        Vector<Comic> csvEntries = new Vector<>();
-        db.ExecuteStatement("use " + Data.Store());
-        ResultSet data = db.ExecutePrepared("select * from csvEntries");
-
-        try {
-            if (data != null) {
-                while (data.next()) {
-                    csvEntries.add(new Comic(data.getString("title"), data.getString("diamond")));
-                }
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        return csvEntries;
-    }
-
     /**
-     * Deletes a csv entry from the database.
+     * Deletes a customer from the database.
      * @param store: The store the customer is from.
      * @param diamond: The diamond code of the csv entry.
      */
@@ -769,7 +733,7 @@ public class DB {
     }
 
     /**
-     * Grabs the records where sameAsId = searchTermsId
+     * Grabs records the records where sameAsId = searchTermsId
      * @param store: The store the records are from.
      * @param data: The table from getJoinedMatches.
      * @return
@@ -810,26 +774,9 @@ public class DB {
     public void insertSearchTerms(String store, String name, String diamond, String issue, String graphicNovel,
                                   String nonBook, String matches){
         db.ExecuteStatement("use " + store);
+
         db.ExecuteData("insert into searchTerms(name,diamond,issue,graphicNovel,nonBook,matches) " + "values(?,?,?,?,?,?)",
                 name, diamond, issue, graphicNovel,nonBook,matches);
-    }
-
-    /**
-     * Returns the id of a particular search term.
-     * @param store: The store the search term is associated with.
-     * @param name: The name of the search term.
-     * @return: The id of the search term.
-     */
-    public String getSearchTermId(String store, String name){
-        db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select id from searchTerms where name = ?", name);
-        if (r == null) return "";
-        try {
-            if (!r.next()) return "";
-            return r.getString("id");
-        }
-        catch (Exception e) { System.out.println(e); }
-        return "";
     }
 
     /**
@@ -845,12 +792,6 @@ public class DB {
                 customerId, searchTermId, number);
     }
 
-    /**
-     * Inserts a synonym into the synonyms table.
-     * @param store: The name of the store.
-     * @param matchId: The actual item id Dragon's Lair has.
-     * @param sameAsId: The customer's search term id.
-     */
     public void insertSynonyms(String store, String matchId, String sameAsId){
         db.ExecuteStatement("use " + store);
         db.ExecuteData("insert into synonyms(matched_id, sameAs_id) " + "values(?,?)", matchId, sameAsId);
