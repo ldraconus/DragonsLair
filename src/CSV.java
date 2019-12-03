@@ -109,7 +109,8 @@ public class CSV
      */
     public void openFile(String location) {
         String line = "";
-        String date = "";
+        String[] date;
+        String csvIdDate = null;
 
         try {
             reader = new BufferedReader(new FileReader(location));
@@ -120,8 +121,24 @@ public class CSV
                 String[] fullLine = line.split(",");
 
                 if (length == 4) {
-                    date = fullLine[0].replaceAll("\"", "");
-                    System.out.printf("File Date: %s\n", date);
+                    date = fullLine[0].split("/");
+                    String month = date[0].replaceAll("\"","");
+                    String day = date[1].replaceAll("\"","");
+                    String year = "20" + date[2].replaceAll("\"", "");
+                    if (month.length() < 2) {
+                        month = "0" + month;
+                    }
+                    if (day.length() < 2) {
+                        day = "0" + day;
+                    }
+                    String formattedDate = year + "-" + month + "-" + day;
+
+                    if (!Data.DB().csvDateExists(formattedDate, Data.Store())) {
+                        Data.DB().insertCsvDates(formattedDate, Data.Store());
+                    }
+                    csvIdDate = Data.DB().getCsvDateId(Data.Store(), formattedDate);
+
+                    System.out.printf("Date: %s. CSVIDDate: %s\n", formattedDate, csvIdDate);
                 }
 
                 if (length > 4) {
@@ -132,7 +149,6 @@ public class CSV
                     String graphicNovel = "0";
                     String collection = "0";
                     String nonBook = "0";
-                    String csvID = null;
                     String store = Data.Store();
                     int issueLocation = fullLine[2].indexOf('#');
                     if (issueLocation > -1) {
@@ -155,7 +171,7 @@ public class CSV
                             nonBook = "1";
                     }
 
-                    Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, collection, nonBook, csvID, store);
+                    Data.DB().insertCsvEntries(title, diamondCode, issue, graphicNovel, nonBook, csvIdDate, store);
                 }
             }
             System.out.printf("Length of file: %d\n", length - 4);

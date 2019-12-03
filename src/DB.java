@@ -1,9 +1,6 @@
 //import org.jetbrains.annotations.NotNull;
 
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Vector;
 
 //import com.sun.istack.internal.NotNull;
@@ -89,7 +86,6 @@ public class DB {
                                                     "diamond varchar(100), " +
                                                     "issue integer, " +
                                                     "graphicNovel integer, " +
-                                                    "collection integer, " +
                                                     "nonBook integer, " +
                                                     "matches varchar(128), " +
         											"primary key(id))");
@@ -140,7 +136,6 @@ public class DB {
                                                 "title varchar(128), " +
                                                 "issue integer, " +
                                                 "graphicNovel integer, " +
-                                                "collection integer, " +
                                                 "nonBook integer, " +
                                                 "diamond varchar(20), " +
                                                 "csv_id integer, " +
@@ -530,8 +525,8 @@ public class DB {
      */
     public String GetCustomerEMail(String store, String name) {
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select customer.email from customer " +
-                "where customer.name = ? ", name);
+        ResultSet r = db.ExecutePrepared("select email from customer " +
+                "where name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -605,18 +600,17 @@ public class DB {
      * @param diamondCode The identification for an item.
      * @param issue The issue of the comic.
      * @param graphicNovel Determines if it is a graphicNovel.
-     * @param collection Determines which collection the item is.
      * @param nonBook Determines if the item is a book or not.
      * @param csvId The date csv file was read in. The most recent date determines new releases.
      * @param store
      */
     public void insertCsvEntries(String title, String diamondCode, String issue, String graphicNovel,
-                                 String collection, String nonBook, String csvId, String store) {
+                                  String nonBook, String csvId, String store) {
 
         if (!csvEntryExists(diamondCode,store)) {
             db.ExecuteStatement("use " +  store);
-            db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, collection, nonBook, diamond, csv_id) " +
-                    "values(?,?,?,?,?,?,?)", title, issue, graphicNovel, collection, nonBook, diamondCode,csvId);
+            db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, nonBook, diamond, csv_id) " +
+                    "values(?,?,?,?,?,?)", title, issue, graphicNovel, nonBook, diamondCode,csvId);
         }
         else {
             System.out.println("skipped");
@@ -624,16 +618,37 @@ public class DB {
     }
 
     /**
-     * This method should be deleted immediately.
+     * Gets a csv entry id by the title.
+     * @param store: The store the csv entry resides in.
+     * @param title: The name of the item.
+     * @return: The id of the item.
      */
-    public void insertItemTable(String itemName, String diamondCode, String store) {
+    public String getCsvEntryId(String store, String title){
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select id from csvEntries where title = ?", title);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
 
-        if (!csvEntryExists(diamondCode,store)) {
-            db.ExecuteStatement("use " + store);
-            db.ExecuteData("insert into csvEntries(title, diamond) " +
-                    "values(?,?)", itemName, diamondCode);
-        } else {
-            System.out.println("skipped");
+    /**
+     * Determines if an item exists.
+     * @param date The date to check for existence.
+     * @param store The store to check in.
+     * @return
+     */
+    Boolean csvDateExists(String date, String store) {
+        db.ExecuteStatement("use " + store);
+        ResultSet theCSVDate = db.ExecutePrepared("select csvDate from csvDates where csvDate = ?", date);
+        try {
+            return theCSVDate != null && theCSVDate.next();
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
         }
     }
 
@@ -653,14 +668,13 @@ public class DB {
      * @param date The date of the csv we want.
      * @return
      */
-    public String getCsvDateId(String store, String date){
+    public String getCsvDateId(String store, String date)  {
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select csvDates.csvDate from ?.csvDates " +
-                "where csvDates.csvDate = ? ", date);
+        ResultSet r = db.ExecutePrepared("select id from csvDates where csvDate = ?", date);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
-            return r.getString("csvDates.id");
+            return r.getString("id");
         }
         catch (Exception e) { System.out.println(e); }
         return "";
@@ -688,13 +702,158 @@ public class DB {
         return csvEntries;
     }
 
+    public Vector<Comic> getCSVEntries(){
+        Vector<Comic> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select * from csvEntries");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(new Comic(data.getString("title"), data.getString("diamond")));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
     /**
-     * Deletes a customer from the database.
+     * Deletes a csv entry from the database.
      * @param store: The store the customer is from.
      * @param diamond: The diamond code of the csv entry.
      */
     public void deleteCsvEntry(String store, String diamond) {
         db.ExecuteStatement("use " + store);
-        db.ExecuteData("delete from csvEntry where diamond=?", diamond);
+        db.ExecuteData("delete from csvEntries where diamond=?", diamond);
     }
+
+    /**
+     * This is the first step in the pull processing. Pulls all the csv entries based on the date id.
+     * @param store: The store the csv entries are from.
+     * @param date: The date the user searches by.
+     * @return: a vector of all the csv entries that are from a certain date.
+     */
+    public Vector<String> getCsvEntriesByDate(String store, String date){
+        db.ExecuteStatement("use " + store);
+        String date_id = getCsvDateId(store,date);
+        ResultSet data = db.ExecutePrepared("select * from csvEntries where csv_id = ?", date_id);
+        Vector<String> csvEntries = new Vector<>();
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("id"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Returns the result of joining searchTerms with synonyms based on id.
+     * This is step 7 and 8 in the pull processing text.
+     * @param store
+     * @return
+     */
+    public ResultSet getJoinedMatches(String store){
+        db.ExecuteStatement("use " + store);
+        Vector<String> matches = new Vector<String>();
+        ResultSet data = db.ExecutePrepared("select * from synonyms, searchTerms where synonyms.match_id = searchTerms.id");
+        return data;
+    }
+
+    /**
+     * Grabs the records where sameAsId = searchTermsId
+     * @param store: The store the records are from.
+     * @param data: The table from getJoinedMatches.
+     * @return
+     */
+    public Vector<Integer> getMatchSearchTerms(String store, ResultSet data){
+        db.ExecuteStatement("use " + store);
+        ResultSet searchTerms = db.ExecutePrepared("select * from searchTerms");
+        Vector<Integer> matches = new Vector<Integer>();
+        int searchTermId;
+        int dataId;
+
+        try {
+            if (data != null) {
+                while (data.next() && searchTerms.next()) {
+                    searchTermId = searchTerms.getInt("id");
+                    dataId = data.getInt("sameAs_id");
+                    if(searchTermId == dataId){
+                        matches.add(searchTermId);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return matches;
+    }
+
+    /**
+     * Inserting into the searchTerms.
+     * @param store: The store being used.
+     * @param name: The name of the item the customer wants (customer jargon).
+     * @param diamond: The diamond code.
+     * @param issue: The issue number.
+     * @param graphicNovel: Determines if the item is a graphic novel.
+     * @param nonBook: Determines if the item is a book.
+     * @param matches: The actual name of the item that Dragon's Lair has.
+     */
+    public void insertSearchTerms(String store, String name, String diamond, String issue, String graphicNovel,
+                                  String nonBook, String matches){
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into searchTerms(name,diamond,issue,graphicNovel,nonBook,matches) " + "values(?,?,?,?,?,?)",
+                name, diamond, issue, graphicNovel,nonBook,matches);
+    }
+
+    /**
+     * Returns the id of a particular search term.
+     * @param store: The store the search term is associated with.
+     * @param name: The name of the search term.
+     * @return: The id of the search term.
+     */
+    public String getSearchTermId(String store, String name){
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select id from searchTerms where name = ?", name);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Inserts into the pull_list
+     * @param store: The store being used.
+     * @param customerId: The id of the customer getting an item.
+     * @param searchTermId: The id of the customer's search term.
+     * @param number: The number of items of searchTermId the customer is getting.
+     */
+    public void insertPullList(String store, String customerId, String searchTermId, String number){
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into pull_list(customer_id, searchTerm_id, number) " + "values(?,?,?)",
+                customerId, searchTermId, number);
+    }
+
+    /**
+     * Inserts a synonym into the synonyms table.
+     * @param store: The name of the store.
+     * @param matchId: The actual item id Dragon's Lair has.
+     * @param sameAsId: The customer's search term id.
+     */
+    public void insertSynonyms(String store, String matchId, String sameAsId){
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("insert into synonyms(matched_id, sameAs_id) " + "values(?,?)", matchId, sameAsId);
+    }
+
 }
