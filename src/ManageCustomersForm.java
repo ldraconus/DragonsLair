@@ -179,10 +179,12 @@ public class ManageCustomersForm {
         new EditCustomer(origCustomer, email, phone);
         if (EditCustomer.isOk()) {
             String customer = EditCustomer.Name();
-            if (customer.equals(origCustomer)) return;
+            String newEmail = EditCustomer.EMail();
+            String newPhone = EditCustomer.Phone();
+            if (customer.equals(origCustomer) && newEmail.equals(email) && newPhone.equals(phone)) return;
             if (customer.isEmpty()) return;
-            if (Data.DB().CustomerExists(Data.Store(), customer)) return;
-            Data.DB().UpdateCustomer(Data.Store(), origCustomer, customer, email, phone);
+            //if (Data.DB().CustomerExists(Data.Store(), customer)) return;
+            Data.DB().UpdateCustomer(Data.Store(), origCustomer, customer, newEmail, newPhone);
             searchTextField.setText("");
             customers = Data.DB().GetCustomers();
             SetCustomerList(customers);
