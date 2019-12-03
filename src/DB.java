@@ -544,8 +544,8 @@ public class DB {
      */
     public String GetCustomerPhone(String store, String name) {
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select phone from customer " +
-                "where name = ? ", name);
+        ResultSet r = db.ExecutePrepared("select customer.phone from customer " +
+                "where customer.name = ? ", name);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
