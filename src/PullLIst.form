@@ -95,7 +95,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="89e77" class="javax.swing.JTextField" binding="customerPulls">
+              <component id="e5e2" class="javax.swing.JList" binding="customerPulls">
                 <constraints/>
                 <properties/>
               </component>
