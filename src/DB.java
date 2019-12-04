@@ -847,6 +847,22 @@ public class DB {
         return csvEntries;
     }
 
+    public int getCustomerID(String name, String phone, String email) {
+        int customerID = -1;
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select id from customer where name = ? AND phone = ? AND email = ?", name, phone, email);
+
+        try {
+            if (data != null) {
+                customerID = Integer.parseInt(data.getString("id"));
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return customerID;
+    }
+
     /**
      * Deletes a customer from the database.
      * @param store: The store the customer is from.

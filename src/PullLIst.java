@@ -8,7 +8,8 @@ import java.util.Vector;
  * Manage customer pull list.
  */
 public class PullLIst extends JDialog {
-    private Vector<String> comics;
+    private Vector<String> possibleMatches;
+    private Vector<String> customerRequests;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -17,13 +18,14 @@ public class PullLIst extends JDialog {
     private JButton addToPullButton;
     private JButton addItemButton;
     private JButton removeButton;
-    private JTextField customerPulls;
     private JRadioButton nameButton;
     private JRadioButton issueButton;
     private JRadioButton diamondButton;
     private JRadioButton graphicButton;
     private JRadioButton nonBookButton;
     private JList inInventory;
+    private JList customerPulls;
+    private int customerID;
 
     private static JFrame frame = null;
 
@@ -51,6 +53,11 @@ public class PullLIst extends JDialog {
         inInventory.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) { SelectionChanged(); }
+        });
+
+        customerPulls.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) { pullListSelectionChanged(); }
         });
 
         // call onCancel() when cross is clicked
@@ -102,13 +109,13 @@ public class PullLIst extends JDialog {
                 SelectionChanged();
             }
         });
-        SetComicList(Data.DB().getCsvEntries());
+        SetMatchesList(Data.DB().getCsvEntries());
     }
 
     /**
      * Create a new JFrame and add the initial UI components.
      */
-    public void Display() {
+    public void Display(String name, String email, String phone) {
         if (frame == null) {
             frame = new JFrame("Dragon's Lair Manage Pull List");
             frame.setContentPane(new PullLIst().contentPane);
@@ -117,6 +124,7 @@ public class PullLIst extends JDialog {
             frame.setLocationRelativeTo(null);
         }
         frame.setVisible(true);
+        customerID = Data.DB().getCustomerID(name, email, phone);
     }
 
     /**
@@ -139,11 +147,18 @@ public class PullLIst extends JDialog {
      * Filter the customer list.
      * @param comic Used for filtering.
      */
-    private void SetComicList(Vector<String> comic) {
+    private void SetMatchesList(Vector<String> comic) {
         inInventory.clearSelection();
         DefaultListModel<String> data = new DefaultListModel<String>();
         for (String c: comic) data.addElement(c);
         inInventory.setModel(data);
+    }
+
+    private void SetPullsList(Vector<String> comic) {
+        customerPulls.clearSelection();
+        DefaultListModel<String> data = new DefaultListModel<String>();
+        for (String c: comic) data.addElement(c);
+        customerPulls.setModel(data);
     }
 
     /**
@@ -158,36 +173,36 @@ public class PullLIst extends JDialog {
      */
     private void nameFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        comics = Data.DB().getCsvEntries();
-        SetComicList(comics);
+        possibleMatches = Data.DB().getCsvEntries();
+        SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
     private void diamondFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        comics = Data.DB().getDiamondCode();
-        SetComicList(comics);
+        possibleMatches = Data.DB().getDiamondCode();
+        SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
     private void nonBookFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        comics = Data.DB().getNonBookItems();
-        SetComicList(comics);
+        possibleMatches = Data.DB().getNonBookItems();
+        SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
     private void graphicNovelFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        comics = Data.DB().getGraphicNovels();
-        SetComicList(comics);
+        possibleMatches = Data.DB().getGraphicNovels();
+        SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
     private void issueNumberFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        comics = Data.DB().getIssueNumbers();
-        SetComicList(comics);
+        possibleMatches = Data.DB().getIssueNumbers();
+        SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
@@ -219,5 +234,12 @@ public class PullLIst extends JDialog {
      */
     private void SelectionChanged() {
         chooseItems();
+    }
+
+    private void pullListSelectionChanged() {
+        customerPulls.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        customerRequests = Data.DB().getIssueNumbers();
+        SetPullsList(customerRequests);
+        frame.setVisible(true);
     }
 }
