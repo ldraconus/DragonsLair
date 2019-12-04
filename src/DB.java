@@ -640,6 +640,24 @@ public class DB {
     }
 
     /**
+     * Gets a csv entry id by the title.
+     * @param store: The store the csv entry resides in.
+     * @param title: The name of the item.
+     * @return: The id of the item.
+     */
+    public String getCsvEntryId(String store, String title){
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select id from csvEntries where title = ?", title);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
      * Determines if an item exists.
      * @param date The date to check for existence.
      * @param store The store to check in.
@@ -719,6 +737,107 @@ public class DB {
             if (data != null) {
                 while (data.next()) {
                     csvEntries.add(new Comic(data.getString("title"), data.getString("diamond")));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Grabs all the names of the diamond codes.
+     * @return
+     */
+    public Vector<String> getDiamondCode() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select diamond from csvEntries");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("diamond"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Grabs all the names of the non book items.
+     * @return
+     */
+    public Vector<String> getNonBookItems() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select title from csvEntries where nonBook = 1");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("title"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Grabs all the names of the graphic novels.
+     * @return
+     */
+    public Vector<String> getGraphicNovels() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select title from csvEntries where graphicNovel = 1");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("title"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Grabs all issue numbers.
+     * @return
+     */
+    public Vector<String> getIssueNumbers() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select issue from csvEntries where issue is not null order by issue");
+        int index = -1;
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    if (index > -1) {
+                        if (csvEntries.get(index).compareTo(data.getString("issue")) != 0) {
+                            csvEntries.add(data.getString("issue"));
+                            index++;
+                        }
+                        else {
+                            data.next();
+                        }
+                    }
+                    else {
+                        csvEntries.add(data.getString("issue"));
+                        index++;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -861,6 +980,12 @@ public class DB {
                 customerId, searchTermId, number);
     }
 
+    /**
+     * Inserts a synonym into the synonyms table.
+     * @param store: The name of the store.
+     * @param matchId: The actual item id Dragon's Lair has.
+     * @param sameAsId: The customer's search term id.
+     */
     public void insertSynonyms(String store, String matchId, String sameAsId){
         db.ExecuteStatement("use " + store);
         db.ExecuteData("insert into synonyms(matched_id, sameAs_id) " + "values(?,?)", matchId, sameAsId);

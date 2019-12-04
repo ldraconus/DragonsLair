@@ -142,7 +142,7 @@ public class ManageCustomersForm {
      * Get and set the customer list.
      */
     private void Open() {
-        customerList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        //customerList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         customers = Data.DB().GetCustomers();
         SetCustomerList(customers);
         SetContext();
@@ -179,12 +179,10 @@ public class ManageCustomersForm {
         new EditCustomer(origCustomer, email, phone);
         if (EditCustomer.isOk()) {
             String customer = EditCustomer.Name();
-            String newEmail = EditCustomer.EMail();
-            String newPhone = EditCustomer.Phone();
-            if (customer.equals(origCustomer) && newEmail.equals(email) && newPhone.equals(phone)) return;
+            if (customer.equals(origCustomer)) return;
             if (customer.isEmpty()) return;
-            //if (Data.DB().CustomerExists(Data.Store(), customer)) return;
-            Data.DB().UpdateCustomer(Data.Store(), origCustomer, customer, newEmail, newPhone);
+            if (Data.DB().CustomerExists(Data.Store(), customer)) return;
+            Data.DB().UpdateCustomer(Data.Store(), origCustomer, customer, email, phone);
             searchTextField.setText("");
             customers = Data.DB().GetCustomers();
             SetCustomerList(customers);
