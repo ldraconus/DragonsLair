@@ -556,6 +556,28 @@ public class DB {
     }
 
     /**
+     * Given a customer name, returns their id.
+     * @param store: The store the customer is from.
+     * @param name: The name of the customer.
+     * @return
+     */
+    public String getCustomerId(String store, String name){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet r = db.ExecutePrepared("select id from customer where name = ?", name);
+
+        if(r == null) {
+            return "";
+        }
+        try {
+            if (!r.next()) return "";
+            return r.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
      * Updates a customer value.
      * @param store: The store the customer is associated with.
      * @param origCustomer: The original name of the customer.
@@ -702,6 +724,10 @@ public class DB {
         return csvEntries;
     }
 
+    /**
+     * Returns a vector of comics.
+     * @return
+     */
     public Vector<Comic> getCSVEntries(){
         Vector<Comic> csvEntries = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
@@ -822,7 +848,7 @@ public class DB {
     }
 
     /**
-     * Deletes a csv entry from the database.
+     * Deletes a customer from the database.
      * @param store: The store the customer is from.
      * @param diamond: The diamond code of the csv entry.
      */
@@ -870,7 +896,7 @@ public class DB {
     }
 
     /**
-     * Grabs the records where sameAsId = searchTermsId
+     * Grabs records the records where sameAsId = searchTermsId
      * @param store: The store the records are from.
      * @param data: The table from getJoinedMatches.
      * @return
@@ -911,26 +937,34 @@ public class DB {
     public void insertSearchTerms(String store, String name, String diamond, String issue, String graphicNovel,
                                   String nonBook, String matches){
         db.ExecuteStatement("use " + store);
+
         db.ExecuteData("insert into searchTerms(name,diamond,issue,graphicNovel,nonBook,matches) " + "values(?,?,?,?,?,?)",
                 name, diamond, issue, graphicNovel,nonBook,matches);
     }
 
     /**
-     * Returns the id of a particular search term.
-     * @param store: The store the search term is associated with.
-     * @param name: The name of the search term.
-     * @return: The id of the search term.
+     * Given the name of a search term returns a vector of all the id's it is associated with.
+     * This will later help insert into the pull_list where a searchTerm_id is needed for a particular customer.
+     * @param store: The store the search terms are associated with.
+     * @param term: The name of a particular search term.
+     * @return
      */
-    public String getSearchTermId(String store, String name){
+    public Vector<String> getSearchid(String store, String term){
         db.ExecuteStatement("use " + store);
-        ResultSet r = db.ExecutePrepared("select id from searchTerms where name = ?", name);
-        if (r == null) return "";
+        Vector<String> theIds = new Vector<String>();
+        ResultSet termid = db.ExecutePrepared("select id from searchTerms where name = ?", term);
+
         try {
-            if (!r.next()) return "";
-            return r.getString("id");
+            if (termid != null) {
+                while (termid.next()) {
+                    theIds.add(termid.getString("id"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
-        catch (Exception e) { System.out.println(e); }
-        return "";
+
+        return theIds;
     }
 
     /**
@@ -956,5 +990,57 @@ public class DB {
         db.ExecuteStatement("use " + store);
         db.ExecuteData("insert into synonyms(matched_id, sameAs_id) " + "values(?,?)", matchId, sameAsId);
     }
+
+    /****************************************************************************************************
+     * This is the start of the methods (more table joining and more complicated data extraction) needed
+     * for pull processing.
+     *
+     * The synonym table is not necessary to perform pull processing if matches from search terms is used
+     * to match a searchTerm with a csv entry from the csvEntries table. For future use it would probably
+     * be better to change matches to csvEntries_id which would be a foreign key corresponding to id in
+     * the csvEntries table.
+     *
+     ****************************************************************************************************/
+
+    /**
+     * Used to return the result set containing all the information needed to insert into the pulls table given
+     * a particular customer.
+     * @param store: The store the customer is associated with.
+     * @param customer: The name of the customer.
+     * @return
+     */
+    public ResultSet csvPullJoin(String store, String customer){
+        String customerId = getCustomerId(store, customer);
+
+        db.ExecutePrepared("use " + store);
+        ResultSet theIds = db.ExecutePrepared("select csvEntries.id, pull_list.customer_id, pull_list.number " +
+                        "from csvEntries, pull_list, searchTerms " +
+                        "where customer_id = ? and searchTerm_id = searchTerms.id and matches = title", customerId);
+
+        return theIds;
+    }
+
+    public void insertFromPull(String store, String customer){
+        db.ExecutePrepared("use " + store);
+
+        ResultSet pulls = csvPullJoin(store,customer);
+        try {
+            if (pulls != null) {
+                while (pulls.next()) {
+                    db.ExecuteData("insert into pulls(customer_id, csvEntries_id, number) values(?,?,?)",
+                            pulls.getString("customer_id"),
+                            pulls.getString("id"), pulls.getString("number"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    /****************************************************************************************************
+     * This is the end of my version of the pull processing. This little barrier can be
+     * deleted at the end.
+     *
+     ****************************************************************************************************/
 
 }
