@@ -721,6 +721,107 @@ public class DB {
     }
 
     /**
+     * Grabs all the names of the diamond codes.
+     * @return
+     */
+    public Vector<String> getDiamondCode() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select diamond from csvEntries");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("diamond"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Grabs all the names of the non book items.
+     * @return
+     */
+    public Vector<String> getNonBookItems() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select title from csvEntries where nonBook = 1");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("title"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Grabs all the names of the graphic novels.
+     * @return
+     */
+    public Vector<String> getGraphicNovels() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select title from csvEntries where graphicNovel = 1");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("title"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
+     * Grabs all issue numbers.
+     * @return
+     */
+    public Vector<String> getIssueNumbers() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select issue from csvEntries where issue is not null order by issue");
+        int index = -1;
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    if (index > -1) {
+                        if (csvEntries.get(index).compareTo(data.getString("issue")) != 0) {
+                            csvEntries.add(data.getString("issue"));
+                            index++;
+                        }
+                        else {
+                            data.next();
+                        }
+                    }
+                    else {
+                        csvEntries.add(data.getString("issue"));
+                        index++;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvEntries;
+    }
+
+    /**
      * Deletes a csv entry from the database.
      * @param store: The store the customer is from.
      * @param diamond: The diamond code of the csv entry.
