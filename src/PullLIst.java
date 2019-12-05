@@ -12,7 +12,6 @@ public class PullLIst extends JDialog {
     private Vector<String> customerPullsList;
     private Vector<String> possiblePulls;
     private JPanel contentPane;
-    private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField requestSearch;
     private JTextField customerPullsSearch;
@@ -38,13 +37,8 @@ public class PullLIst extends JDialog {
 
         setContentPane(contentPane);
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
+        getRootPane().setDefaultButton(buttonCancel);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
 
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -154,6 +148,7 @@ public class PullLIst extends JDialog {
      */
     private void addItem() {
         new AddSearchTerm().Display();
+        SetMatchesList(Data.DB().getSearchTermsNames());
     }
 
     /**
