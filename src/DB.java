@@ -1169,8 +1169,8 @@ public class DB {
     public Vector<String> getSearchTermNameVector(String store, String id){
         db.ExecuteStatement("use " + store);
         Vector<String> ids = new Vector<String>();
-        ResultSet r = db.ExecutePrepared("select * from searchTerms, pull_list, where customer_id = ? and " +
-                "searchTerm.id = searchTerm_id", id);
+        ResultSet r = db.ExecutePrepared("select * from searchTerms, pull_list where customer_id = ? and " +
+                "searchTerms.id = searchTerm_id", id);
         try {
             if (r != null) {
                 while (r.next()) {
