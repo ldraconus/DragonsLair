@@ -45,11 +45,13 @@ public class ManageComicsForm {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                AddComic();
             }
         });
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                EditComic();
             }
         });
         deleteButton.addActionListener(new ActionListener() {
@@ -142,7 +144,7 @@ public class ManageComicsForm {
     }*/
 
     /**
-     * Delete customer.
+     * Delete a comic to the database and JTable.
      */
     private void Delete() {
         if(comicTable.getSelectionModel().isSelectionEmpty())
@@ -154,10 +156,51 @@ public class ManageComicsForm {
         Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + comicTitle + "?");
         if (msg.getButton() == Message.NoButton) return;
         Data.DB().deleteCsvEntry(Data.Store(), diamondCode);
+
+        // Update JTable.
         ((DefaultTableModel)comicTable.getModel()).removeRow(selectedRow);
     }
 
+    /**
+     * Add a comic to the database and JTable.
+     */
+    private void AddComic(){
+        new AddOrEditComic("", "", "", "", "", "");
+        if(AddOrEditComic.Finished()){
+            System.out.println(AddOrEditComic.ComicTitle());
+
+            Data.DB().insertCsvEntries(AddOrEditComic.ComicTitle(), AddOrEditComic.DiamondCode(), AddOrEditComic.Issue(),
+                    AddOrEditComic.GraphicNovel(), AddOrEditComic.NonBook(), AddOrEditComic.CsvId(), Data.Store());
+
+            // Update JTable.
+            Object[] rowData = {AddOrEditComic.ComicTitle(), AddOrEditComic.DiamondCode()};
+            ((DefaultTableModel)comicTable.getModel()).addRow(rowData);
+        }
+    }
+
+    /**
+     * Edit a comic.
+     */
+    private void EditComic(){
+        if(comicTable.getSelectionModel().isSelectionEmpty())
+            return;
+
+        int selectedRow = comicTable.getSelectedRow();
+        String diamondCode = comicTable.getModel().getValueAt(selectedRow, 1).toString();
+        Comic comic = Data.DB().getCsvEntry(Data.Store(), diamondCode);
+
+        new AddOrEditComic(comic.getTitle(), comic.getDiamondCode(), comic.getGraphicNovel(), comic.getNonBook(), comic.getIssue(), comic.getCsvDate());
+        if(AddOrEditComic.Finished()) {
+            Comic newComic = new Comic(AddOrEditComic.ComicTitle(), AddOrEditComic.DiamondCode());
+            newComic.setIssue(AddOrEditComic.Issue());
+            newComic.setGraphicNovel(AddOrEditComic.GraphicNovel());
+            newComic.setNonBook(AddOrEditComic.NonBook());
+            Data.DB().updateCsvEntry(Data.Store(), newComic, AddOrEditComic.CsvId(), comic.getDiamondCode());
+            Open();
+        }
+    }
+
     private void Done() {
-        frame.setVisible(false);
+        Dispose();
     }
 }
