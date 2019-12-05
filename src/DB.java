@@ -1163,8 +1163,8 @@ public class DB {
     public Vector<String> getSearchTermNameVector(String store, String id){
         db.ExecuteStatement("use " + store);
         Vector<String> ids = new Vector<String>();
-        ResultSet r = db.ExecutePrepared("select * from searchTerms, pull_list, where customer_id = ? and " +
-                "searchTerm.id = searchTerm_id", id);
+        ResultSet r = db.ExecutePrepared("select * from searchTerms, pull_list where customer_id = ? and " +
+                "searchTerms.id = searchTerm_id", id);
         try {
             if (r != null) {
                 while (r.next()) {
@@ -1214,6 +1214,41 @@ public class DB {
         db.ExecuteStatement("use " + store);
         db.ExecuteData("insert into pull_list(customer_id, searchTerm_id, number) " + "values(?,?,?)",
                 customerId, searchTermId, number);
+    }
+
+    /**
+     * Gets the customer id's from the pull list.
+     * @param store: The store the customer's are associated with.
+     * @param id: The customer id.
+     * @return
+     */
+    public Vector<String> getPullCustomerId(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        Vector<String> theIds = new Vector<String>();
+        ResultSet termid = db.ExecutePrepared("select id from pull_list where customer_id = ?", id);
+
+        try {
+            if (termid != null) {
+                while (termid.next()) {
+                    theIds.add(termid.getString("id"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return theIds;
+    }
+
+    /**
+     * Deletes a pull list table based on an id.
+     * @param store: The store being used.
+     * @param id: The customer id.
+     */
+    public void deletePullList(String store, String id){
+        db.ExecuteStatement("use " + store);
+        db.ExecutePrepared("delete from pull_list where customer_id = ?", id);
     }
 
     /**
