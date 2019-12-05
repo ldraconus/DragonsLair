@@ -1223,6 +1223,41 @@ public class DB {
     }
 
     /**
+     * Gets the customer id's from the pull list.
+     * @param store: The store the customer's are associated with.
+     * @param id: The customer id.
+     * @return
+     */
+    public Vector<String> getPullCustomerId(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        Vector<String> theIds = new Vector<String>();
+        ResultSet termid = db.ExecutePrepared("select id from pull_list where customer_id = ?", id);
+
+        try {
+            if (termid != null) {
+                while (termid.next()) {
+                    theIds.add(termid.getString("id"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return theIds;
+    }
+
+    /**
+     * Deletes a pull list table based on an id.
+     * @param store: The store being used.
+     * @param id: The customer id.
+     */
+    public void deletePullList(String store, String id){
+        db.ExecuteStatement("use " + store);
+        db.ExecutePrepared("delete from pull_list where customer_id = ?", id);
+    }
+
+    /**
      * Inserts a synonym into the synonyms table.
      * @param store: The name of the store.
      * @param matchId: The actual item id Dragon's Lair has.
