@@ -1143,15 +1143,37 @@ public class DB {
     public String getSearchTermId(String store, String searchTermName){
         db.ExecuteStatement("use " + store);
 
-        ResultSet data = db.ExecutePrepared("select name from searchTerms where name = ?",searchTermName);
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where name = ?",searchTermName);
 
         if (data == null) return "";
         try {
             if (!data.next()) return "";
-            return data.getString("name");
+            return data.getString("id");
         }
         catch (Exception e) { System.out.println(e); }
         return "";
+    }
+
+    /**
+     * Given a customer id, returns the name of a search term.
+     * @param store: The store the customer is associated with.
+     * @param id: The customer's id.
+     * @return
+     */
+    public String getSearchTermName(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet r = db.ExecutePrepared("select * from searchTerms, pull_list, where customer_id = ? and " +
+                "searchTerm.id = searchTerm_id", id);
+
+        if(r == null) return "";
+        try {
+            if(!r.next()) return "";
+            return r.getString("name");
+        }
+        catch (Exception e) {System.out.println(e);}
+        return "";
+
     }
 
     /**
