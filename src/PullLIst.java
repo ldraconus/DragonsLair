@@ -109,7 +109,8 @@ public class PullLIst extends JDialog {
                 SelectionChanged();
             }
         });
-        SetMatchesList(Data.DB().getCsvEntries());
+        SetMatchesList(Data.DB().getSearchTermsNames());
+        //nameFill();
     }
 
     /**
@@ -173,35 +174,35 @@ public class PullLIst extends JDialog {
      */
     private void nameFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getCsvEntries();
+        possibleMatches = Data.DB().getSearchTermsNames();
         SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
     private void diamondFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getDiamondCode();
+        possibleMatches = Data.DB().getSearchTermsDiamond();
         SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
     private void nonBookFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getNonBookItems();
+        possibleMatches = Data.DB().getSearchTermsNonBook();
         SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
     private void graphicNovelFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getGraphicNovels();
+        possibleMatches = Data.DB().getSearchTermsGraphic();
         SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
 
     private void issueNumberFill() {
         inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getIssueNumbers();
+        possibleMatches = Data.DB().getSearchTermsIssue();
         SetMatchesList(possibleMatches);
         frame.setVisible(true);
     }
@@ -238,7 +239,7 @@ public class PullLIst extends JDialog {
 
     private void pullListSelectionChanged() {
         customerPulls.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        customerRequests = Data.DB().getIssueNumbers();
+        customerRequests = Data.DB().getDiamondCode();
         SetPullsList(customerRequests);
         frame.setVisible(true);
     }
