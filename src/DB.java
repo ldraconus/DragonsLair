@@ -1166,20 +1166,22 @@ public class DB {
      * @param id: The customer's id.
      * @return
      */
-    public String getSearchTermName(String store, String id){
+    public Vector<String> getSearchTermNameVector(String store, String id){
         db.ExecuteStatement("use " + store);
-
+        Vector<String> ids = new Vector<String>();
         ResultSet r = db.ExecutePrepared("select * from searchTerms, pull_list, where customer_id = ? and " +
                 "searchTerm.id = searchTerm_id", id);
-
-        if(r == null) return "";
         try {
-            if(!r.next()) return "";
-            return r.getString("name");
+            if (r != null) {
+                while (r.next()) {
+                    ids.add(r.getString("name"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
-        catch (Exception e) {System.out.println(e);}
-        return "";
 
+        return ids;
     }
 
     /**
