@@ -1161,6 +1161,28 @@ public class DB {
     }
 
     /**
+     * Given a customer id, returns the name of a search term.
+     * @param store: The store the customer is associated with.
+     * @param id: The customer's id.
+     * @return
+     */
+    public String getSearchTermName(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet r = db.ExecutePrepared("select * from searchTerms, pull_list, where customer_id = ? and " +
+                "searchTerm.id = searchTerm_id", id);
+
+        if(r == null) return "";
+        try {
+            if(!r.next()) return "";
+            return r.getString("name");
+        }
+        catch (Exception e) {System.out.println(e);}
+        return "";
+
+    }
+
+    /**
      * Given the name of a search term returns a vector of all the id's it is associated with.
      * This will later help insert into the pull_list where a searchTerm_id is needed for a particular customer.
      * @param store: The store the search terms are associated with.
