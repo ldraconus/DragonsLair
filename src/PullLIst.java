@@ -10,11 +10,12 @@ import java.util.Vector;
  */
 public class PullLIst extends JDialog {
     private Vector<String> customerPullsList;
+    private Vector<String> possiblePulls;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JTextField textField1;
-    private JTextField textField2;
+    private JTextField requestSearch;
+    private JTextField customerPullsSearch;
     private JButton addToPullButton;
     private JButton addItemButton;
     private JButton removeButton;
@@ -51,6 +52,13 @@ public class PullLIst extends JDialog {
             }
         });
 
+        addItemButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addItem();
+            }
+        });
+
 
         customerPulls.addListSelectionListener(new ListSelectionListener() {
             @Override
@@ -81,13 +89,28 @@ public class PullLIst extends JDialog {
 
         SetMatchesList(Data.DB().getSearchTermsNames());
         SetPullsList(Data.DB().getSearchTermNameVector(Data.Store(), Data.DB().getCustomerID(name, phone, email)));
-        //nameFill();
+
         addToPullButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 addToPull();
             }
         });
+
+        requestSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                searchPullOptions();
+            }
+        });
+
+        customerPullsSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent c) {
+                searchCustomerPullOptions();
+            }
+        });
+
         removeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -126,6 +149,16 @@ public class PullLIst extends JDialog {
         Dispose();
     }
 
+    /**
+     * Add Search term window.
+     */
+    private void addItem() {
+        new AddSearchTerm().Display();
+    }
+
+    /**
+     * Adds selected item from in inventory list to customers pull list. Quantity is always one as of now.
+     */
     private void addToPull() {
         String cuid = Data.DB().getCustomerID(name, phone, email);
         boolean selected = !inInventory.isSelectionEmpty();
@@ -146,6 +179,10 @@ public class PullLIst extends JDialog {
         inInventory.setModel(data);
     }
 
+    /**
+     * Filter the customer list.
+     * @param comic Used for filtering.
+     */
     private void SetPullsList(Vector<String> comic) {
         customerPulls.clearSelection();
         DefaultListModel<String> data = new DefaultListModel<String>();
@@ -153,6 +190,9 @@ public class PullLIst extends JDialog {
         customerPulls.setModel(data);
     }
 
+    /**
+     * Updates the customer pull list window
+     */
     private void setPulls() {
         customerPulls.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         customerPullsList = Data.DB().getSearchTermNameVector(Data.Store(), Data.DB().getCustomerID(name, phone, email));
@@ -160,6 +200,9 @@ public class PullLIst extends JDialog {
         frame.setVisible(true);
     }
 
+    /**
+     * Removes an item from the customers pull list if an item is selected.
+     */
     private void deleteItem() {
         int selectedPosition = customerPulls.getSelectedIndex();
         Vector<String> pullIds = Data.DB().getPullCustomerId(Data.Store(), Data.DB().getCustomerID(name, phone, email));
@@ -170,18 +213,58 @@ public class PullLIst extends JDialog {
     }
 
     /**
+     * Search filter for options to add to the customers pulls.
+     */
+    private void searchPullOptions() {
+        String text = requestSearch.getText();
+        if (text.isEmpty()) {
+            setPossiblePulls();
+            SetMatchesList(possiblePulls);
+            return;
+        }
+        setPossiblePulls();
+        Vector<String> filtered = new Vector<String>();
+        for (String c: possiblePulls) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
+        SetMatchesList(filtered);
+    }
+
+    /**
+     * Search filter for pulls a customer currently has.
+     */
+    private void searchCustomerPullOptions() {
+        String text = customerPullsSearch.getText();
+        if (text.isEmpty()) {
+            setPulls();
+            return;
+        }
+        Vector<String> filtered = new Vector<>();
+        for (String c: customerPullsList) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
+        SetPullsList(filtered);
+    }
+
+    /**
      * Dispose of the JFrame.
      */
     public static void Dispose() { // dispose sub windows
         frame.dispose();
     }
 
+    /**
+     * Deselects everything from the current customer pulls side.
+     */
     private void selectionChanged() {
         customerPulls.clearSelection();
     }
 
     /**
-     * Set the context.
+     * Sets the list of possible pulls that could be added.
+     */
+    private void setPossiblePulls() {
+        possiblePulls = Data.DB().getSearchTermsNames();
+    }
+
+    /**
+     * Clears the selection on the customer side and enables or disables the remove button depending on a selection.
      */
     private void pullListSelectionChanged() {
         inInventory.clearSelection();
