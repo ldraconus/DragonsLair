@@ -1135,6 +1135,26 @@ public class DB {
     }
 
     /**
+     * Gets a search term id.
+     * @param store: The store the search term is from.
+     * @param searchTermName: The name of the search term.
+     * @return
+     */
+    public String getSearchTermId(String store, String searchTermName){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet data = db.ExecutePrepared("select name from searchTerms where name = ?",searchTermName);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("name");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
      * Given the name of a search term returns a vector of all the id's it is associated with.
      * This will later help insert into the pull_list where a searchTerm_id is needed for a particular customer.
      * @param store: The store the search terms are associated with.
@@ -1212,6 +1232,11 @@ public class DB {
         return theIds;
     }
 
+    /**
+     * Inserts into the pulls table after retrieving the needed information.
+     * @param store: The store the pulls are generated from.
+     * @param customer: The name of the customer.
+     */
     public void insertFromPull(String store, String customer){
         db.ExecutePrepared("use " + store);
 
@@ -1228,6 +1253,31 @@ public class DB {
             System.out.println(e);
         }
     }
+
+    /**
+     * For each customer inserts what they want into the pulls table.
+     * @param store: The store being used.
+     */
+    public void createPulls(String store){
+        db.ExecutePrepared("use " + store);
+        String customerName;
+
+        ResultSet r = db.ExecutePrepared("select * from customer, pull_list where customer.id = customer_id");
+
+        try {
+            if(r != null){
+                while(r.next()){
+                    customerName = r.getString("name");
+                    insertFromPull(store,customerName);
+                }
+            }
+        }
+        catch(Exception e){
+            System.out.println(e);
+        }
+    }
+
+
 
     /****************************************************************************************************
      * This is the end of my version of the pull processing. This little barrier can be
