@@ -1149,12 +1149,12 @@ public class DB {
     public String getSearchTermId(String store, String searchTermName){
         db.ExecuteStatement("use " + store);
 
-        ResultSet data = db.ExecutePrepared("select name from searchTerms where name = ?",searchTermName);
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where name = ?",searchTermName);
 
         if (data == null) return "";
         try {
             if (!data.next()) return "";
-            return data.getString("name");
+            return data.getString("id");
         }
         catch (Exception e) { System.out.println(e); }
         return "";

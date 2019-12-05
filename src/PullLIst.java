@@ -158,9 +158,9 @@ public class PullLIst extends JDialog {
 
     private void addToPull() {
         String cuid = Data.DB().getCustomerID(name, phone, email);
-        boolean selected = inInventory.isSelectionEmpty();
+        boolean selected = !inInventory.isSelectionEmpty();
         if (!selected) return;
-        String searchID = "1";//Data.DB().somethingHere;
+        String searchID = Data.DB().getSearchTermId(Data.Store(), inInventory.getSelectedValue().toString());
         Data.DB().insertPullList(Data.Store(), cuid, searchID, "1");
     }
 
@@ -253,11 +253,12 @@ public class PullLIst extends JDialog {
     /**
      * Set the context.
      */
-    private void SelectionChanged() {
+    private void pullListSelectionChanged() {
         chooseItems();
+
     }
 
-    private void pullListSelectionChanged() {
+    private void SelectionChanged() {
         customerPulls.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         customerRequests = Data.DB().getDiamondCode();
         SetPullsList(customerRequests);
