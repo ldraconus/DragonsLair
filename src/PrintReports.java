@@ -93,7 +93,7 @@ public class PrintReports {
     }
 
     private void singleComic() {
-
+        new SingleComicExport().Display();
     }
 
     private void singleCustomer() {
