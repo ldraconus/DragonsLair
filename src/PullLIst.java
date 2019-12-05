@@ -25,7 +25,10 @@ public class PullLIst extends JDialog {
     private JRadioButton nonBookButton;
     private JList inInventory;
     private JList customerPulls;
-    private int customerID;
+    public String customerID;
+    private String name;
+    private String email;
+    private String phone;
 
     private static JFrame frame = null;
 
@@ -33,7 +36,11 @@ public class PullLIst extends JDialog {
      * Class constructor.
      * Setup action listeners for UI components.
      */
-    public PullLIst() {
+    public PullLIst(String nameIn, String emailIn, String phoneIn) {
+        name = nameIn;
+        email = emailIn;
+        phone = phoneIn;
+
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -111,21 +118,26 @@ public class PullLIst extends JDialog {
         });
         SetMatchesList(Data.DB().getSearchTermsNames());
         //nameFill();
+        addToPullButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addToPull();
+            }
+        });
     }
 
     /**
      * Create a new JFrame and add the initial UI components.
      */
-    public void Display(String name, String email, String phone) {
+    public void Display(String name1, String email1, String phone1) {
         if (frame == null) {
             frame = new JFrame("Dragon's Lair Manage Pull List");
-            frame.setContentPane(new PullLIst().contentPane);
+            frame.setContentPane(new PullLIst(name1, email1, phone1).contentPane);
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             frame.pack();
             frame.setLocationRelativeTo(null);
         }
         frame.setVisible(true);
-        customerID = Data.DB().getCustomerID(name, email, phone);
     }
 
     /**
@@ -142,6 +154,14 @@ public class PullLIst extends JDialog {
     private void onCancel() {
         // add your code here if necessary
         Dispose();
+    }
+
+    private void addToPull() {
+        String cuid = Data.DB().getCustomerID(name, phone, email);
+        boolean selected = inInventory.isSelectionEmpty();
+        if (!selected) return;
+        String searchID = "1";//Data.DB().somethingHere;
+        Data.DB().insertPullList(Data.Store(), cuid, searchID, "1");
     }
 
     /**

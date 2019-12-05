@@ -64,6 +64,7 @@
               <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <font name="Comic Sans MS"/>
               <text value="Selection Type"/>
             </properties>
           </component>
@@ -72,6 +73,7 @@
               <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <font name="Comic Sans MS"/>
               <text value="Pull List"/>
             </properties>
           </component>
@@ -84,7 +86,9 @@
             <children>
               <component id="7c8f5" class="javax.swing.JList" binding="inInventory">
                 <constraints/>
-                <properties/>
+                <properties>
+                  <font name="Comic Sans MS"/>
+                </properties>
               </component>
             </children>
           </scrollpane>
@@ -162,6 +166,7 @@
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <font name="Comic Sans MS"/>
               <selected value="true"/>
               <text value="Name"/>
             </properties>
@@ -171,6 +176,7 @@
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <font name="Comic Sans MS"/>
               <text value="Issue"/>
             </properties>
           </component>
@@ -179,6 +185,7 @@
               <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <font name="Comic Sans MS"/>
               <text value="Diamond Code"/>
             </properties>
           </component>
@@ -187,6 +194,8 @@
               <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <font name="Comic Sans MS"/>
+              <hideActionText value="true"/>
               <text value="Graphic Novel"/>
             </properties>
           </component>
@@ -195,6 +204,7 @@
               <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <font name="Comic Sans MS"/>
               <text value="Non-Book"/>
             </properties>
           </component>
