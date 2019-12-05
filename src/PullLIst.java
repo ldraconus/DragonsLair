@@ -162,8 +162,8 @@ public class PullLIst extends JDialog {
 
     private void deleteItem() {
         int selectedPosition = customerPulls.getSelectedIndex();
-        Vector<String> pullIds = things;
-        pullIds.get(selectedPosition);
+        Vector<String> pullIds = Data.DB().getPullCustomerId(Data.Store(), Data.DB().getCustomerID(name, phone, email));
+        Data.DB().deletePullList(Data.Store(), pullIds.get(selectedPosition));
         setPulls();
         customerPulls.clearSelection();
         pullListSelectionChanged();
