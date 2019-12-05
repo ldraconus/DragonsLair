@@ -1,6 +1,8 @@
 //import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Vector;
 
 //import com.sun.istack.internal.NotNull;
@@ -632,7 +634,7 @@ public class DB {
         if (!csvEntryExists(diamondCode,store)) {
             db.ExecuteStatement("use " +  store);
             db.ExecuteData("insert into csvEntries(title, issue, graphicNovel, nonBook, diamond, csv_id) " +
-                    "values(?,?,?,?,?,?)", title, issue, graphicNovel, nonBook, diamondCode,csvId);
+                    "values(?,?,?,?,?,?)", title, issue, graphicNovel, nonBook, diamondCode, csvId);
         }
         else {
             System.out.println("skipped");
@@ -702,6 +704,49 @@ public class DB {
         return "";
     }
 
+    // TODO: Resolve SQLException
+    public String getCsvDate(String store, String id){
+        String csvDate = "";
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select csvDate from csvDates where id = ?", id);
+        if (r == null) return "";
+        try {
+            if (r.next()) {
+                Date date = r.getDate("csvDate");
+                DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+                csvDate = df.format(date);
+            }
+        }
+        catch (Exception e) { System.out.println(e); }
+
+        return csvDate;
+    }
+
+    public Vector<String> getCsvDates(){
+        Vector<String> csvDates = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        // Maybe change the prepared statement.
+        ResultSet results = db.ExecutePrepared("select csvDate from csvDates");
+
+        try {
+            if (results != null) {
+                while (results.next()) {
+
+                    Date date = results.getDate("csvDate");
+                    DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+                    String dateString = df.format(date);
+                    csvDates.add(dateString);
+                    /*System.out.printf("Date: %s\n", text);*/
+
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return csvDates;
+    }
+
     /**
      * Grabs all the names of the csvEntries
      * @return
@@ -744,6 +789,30 @@ public class DB {
         }
 
         return csvEntries;
+    }
+
+    public Comic getCsvEntry(String store, String diamondCode){
+        Comic comic = new Comic("", "");
+        db.ExecuteStatement("use " + store);
+        ResultSet data = db.ExecutePrepared("select * from csvEntries where diamond = ?", diamondCode);
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    comic.setTitle(data.getString("title"));
+                    comic.setDiamondCode(data.getString("diamond"));
+                    comic.setIssue(data.getString("issue"));
+                    comic.setGraphicNovel(data.getString("graphicNovel"));
+                    comic.setNonBook(data.getString("nonBook"));
+                    String csvDate = getCsvDate(store, data.getString("csv_id"));
+                    comic.setCsvDate(csvDate);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return comic;
     }
 
     /**
@@ -871,6 +940,13 @@ public class DB {
     public void deleteCsvEntry(String store, String diamond) {
         db.ExecuteStatement("use " + store);
         db.ExecuteData("delete from csvEntries where diamond=?", diamond);
+    }
+
+    public void updateCsvEntry(String store, Comic comic, String csv_id, String ogDiamondCode) {
+        db.ExecuteStatement("use " + store);
+        db.ExecuteData("update csvEntries set title=?, issue=?, graphicNovel=?, nonBook=?, diamond=?," +
+                " csv_id=? where diamond=?", comic.getTitle(), comic.getIssue(), comic.getGraphicNovel(),
+                comic.getNonBook(), comic.getDiamondCode(), csv_id, ogDiamondCode);
     }
 
     /**
