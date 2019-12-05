@@ -1,10 +1,15 @@
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.event.*;
+import java.util.Vector;
 
 /**
  * Manage customer pull list.
  */
 public class PullLIst extends JDialog {
+    private Vector<String> possibleMatches;
+    private Vector<String> customerRequests;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -13,7 +18,16 @@ public class PullLIst extends JDialog {
     private JButton addToPullButton;
     private JButton addItemButton;
     private JButton removeButton;
-    private JTextField textField3;
+    private JRadioButton nameButton;
+    private JRadioButton issueButton;
+    private JRadioButton diamondButton;
+    private JRadioButton graphicButton;
+    private JRadioButton nonBookButton;
+    private JList inInventory;
+    private JList customerPulls;
+    private int customerID;
+
+    private static JFrame frame = null;
 
     /**
      * Class constructor.
@@ -36,6 +50,16 @@ public class PullLIst extends JDialog {
             }
         });
 
+        inInventory.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent listSelectionEvent) { SelectionChanged(); }
+        });
+
+        customerPulls.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) { pullListSelectionChanged(); }
+        });
+
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -50,6 +74,57 @@ public class PullLIst extends JDialog {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        nameButton.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                SelectionChanged();
+            }
+        });
+
+        diamondButton.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                SelectionChanged();
+            }
+        });
+
+        issueButton.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                SelectionChanged();
+            }
+        });
+
+        nonBookButton.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                SelectionChanged();
+            }
+        });
+
+        graphicButton.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                SelectionChanged();
+            }
+        });
+        SetMatchesList(Data.DB().getCsvEntries());
+    }
+
+    /**
+     * Create a new JFrame and add the initial UI components.
+     */
+    public void Display(String name, String email, String phone) {
+        if (frame == null) {
+            frame = new JFrame("Dragon's Lair Manage Pull List");
+            frame.setContentPane(new PullLIst().contentPane);
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+        }
+        frame.setVisible(true);
+        customerID = Data.DB().getCustomerID(name, email, phone);
     }
 
     /**
@@ -65,6 +140,106 @@ public class PullLIst extends JDialog {
      */
     private void onCancel() {
         // add your code here if necessary
-        dispose();
+        Dispose();
+    }
+
+    /**
+     * Filter the customer list.
+     * @param comic Used for filtering.
+     */
+    private void SetMatchesList(Vector<String> comic) {
+        inInventory.clearSelection();
+        DefaultListModel<String> data = new DefaultListModel<String>();
+        for (String c: comic) data.addElement(c);
+        inInventory.setModel(data);
+    }
+
+    private void SetPullsList(Vector<String> comic) {
+        customerPulls.clearSelection();
+        DefaultListModel<String> data = new DefaultListModel<String>();
+        for (String c: comic) data.addElement(c);
+        customerPulls.setModel(data);
+    }
+
+    /**
+     * Dispose of the JFrame.
+     */
+    public static void Dispose() { // dispose sub windows
+        frame.dispose();
+    }
+
+    /**
+     * Get and set the customer list.
+     */
+    private void nameFill() {
+        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        possibleMatches = Data.DB().getCsvEntries();
+        SetMatchesList(possibleMatches);
+        frame.setVisible(true);
+    }
+
+    private void diamondFill() {
+        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        possibleMatches = Data.DB().getDiamondCode();
+        SetMatchesList(possibleMatches);
+        frame.setVisible(true);
+    }
+
+    private void nonBookFill() {
+        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        possibleMatches = Data.DB().getNonBookItems();
+        SetMatchesList(possibleMatches);
+        frame.setVisible(true);
+    }
+
+    private void graphicNovelFill() {
+        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        possibleMatches = Data.DB().getGraphicNovels();
+        SetMatchesList(possibleMatches);
+        frame.setVisible(true);
+    }
+
+    private void issueNumberFill() {
+        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        possibleMatches = Data.DB().getIssueNumbers();
+        SetMatchesList(possibleMatches);
+        frame.setVisible(true);
+    }
+
+    private void chooseItems() {
+        if (nameButton.isSelected()) {
+            nameFill();
+        }
+        else if (diamondButton.isSelected()) {
+            diamondFill();
+        }
+        else if (nonBookButton.isSelected()) {
+            nonBookFill();
+        }
+        else if (graphicButton.isSelected()) {
+            graphicNovelFill();
+        }
+        else if (issueButton.isSelected()) {
+            issueNumberFill();
+        }
+    }
+
+    private void createUIComponents() {
+        // TODOo: place custom component creation code here
+        nameButton = new JRadioButton("Name");
+    }
+
+    /**
+     * Set the context.
+     */
+    private void SelectionChanged() {
+        chooseItems();
+    }
+
+    private void pullListSelectionChanged() {
+        customerPulls.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        customerRequests = Data.DB().getIssueNumbers();
+        SetPullsList(customerRequests);
+        frame.setVisible(true);
     }
 }
