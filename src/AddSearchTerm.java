@@ -19,7 +19,6 @@ public class AddSearchTerm extends JFrame{
 
     public AddSearchTerm() {
 
-
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOk();
@@ -70,12 +69,15 @@ public class AddSearchTerm extends JFrame{
         String displayName = displayNameField.getText();
         String diamondName = diamondCodeField.getText();
         String issueName = issueField.getText();
-        String inventorySelection = inInventory.getSelectedValue().toString();
+        String inventorySelection = null;
+        if (!inInventory.isSelectionEmpty()) {
+            inventorySelection = inInventory.getSelectedValue().toString();
+        }
         String graphicNovel = graphicCheckBox.isSelected() ? "1" : "0";
         String nonBook = nonBookCheckBox.isSelected() ? "1" : "0";
 
 
-        if (displayName == null) {
+        if (displayName.compareTo("") == 0) {
             String message = "Please enter a display name";
             JOptionPane.showMessageDialog(null, message);
             return;

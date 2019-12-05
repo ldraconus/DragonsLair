@@ -138,6 +138,8 @@ public class SingleComicExport extends JDialog{
         new OutputFiles().Display(outputData);
 
         inInventory.clearSelection();
+        searchField.setText("");
+        searchPullOptions();
     }
 
     private void onCancel() {
