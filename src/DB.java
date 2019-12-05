@@ -1014,22 +1014,28 @@ public class DB {
         return csvEntries;
     }
 
-    public int getCustomerID(String name, String phone, String email) {
-        int customerID = -1;
+    public String getCustomerID(String name, String phone, String email) {
+        String customerID = "";
         db.ExecuteStatement("use " + Data.Store());
         ResultSet data = db.ExecutePrepared("select id from customer where name = ? AND phone = ? AND email = ?", name, phone, email);
 
+        if (data == null) return customerID;
         try {
+            if (!data.next()) return customerID;
+            return data.getString("id");
+        } catch (Exception e) {
+            System.out.println(e);
+        } return customerID;
+        /*try {
             if (data != null) {
-                while (data.next()) {
                     customerID = Integer.parseInt(data.getString("id"));
-                }
+                //}
             }
         } catch (Exception e) {
             System.out.println(e);
         }
 
-        return customerID;
+        return customerID;*/
     }
 
     /**
