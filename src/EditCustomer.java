@@ -53,7 +53,7 @@ public class EditCustomer extends JDialog {
         customerNameField.setText(name);
         emailAddressField.setText(email);
         phoneNumberField.setText(phone);
-        setModal(true);
+        //setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
         /**

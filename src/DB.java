@@ -881,6 +881,104 @@ public class DB {
         return csvEntries;
     }
 
+    public Vector<String> getSearchTermsNames() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select name from searchTerms");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("name"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return csvEntries;
+    }
+
+    public Vector<String> getSearchTermsNonBook() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where nonBook = 1");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("title"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return csvEntries;
+    }
+
+    public Vector<String> getSearchTermsDiamond() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select diamond from searchTerms");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("diamond"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return csvEntries;
+    }
+
+    public Vector<String> getSearchTermsIssue() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select issue from searchTerms where issue is not null order by issue");
+        int index = -1;
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    if (index > -1) {
+                        if (csvEntries.get(index).compareTo(data.getString("issue")) != 0) {
+                            csvEntries.add(data.getString("issue"));
+                            index++;
+                        }
+                        else {
+                            data.next();
+                        }
+                    }
+                    else {
+                        csvEntries.add(data.getString("issue"));
+                        index++;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return csvEntries;
+    }
+
+    public Vector<String> getSearchTermsGraphic() {
+        Vector<String> csvEntries = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where graphicNovel = 1");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    csvEntries.add(data.getString("title"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return csvEntries;
+    }
+
     /**
      * Grabs all issue numbers.
      * @return
@@ -923,7 +1021,9 @@ public class DB {
 
         try {
             if (data != null) {
-                customerID = Integer.parseInt(data.getString("id"));
+                while (data.next()) {
+                    customerID = Integer.parseInt(data.getString("id"));
+                }
             }
         } catch (Exception e) {
             System.out.println(e);
