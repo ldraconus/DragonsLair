@@ -1241,6 +1241,26 @@ public class DB {
     /**
      * Gets a search term id.
      * @param store: The store the search term is from.
+     * @param id: The id of the search term.
+     * @return
+     */
+    public String getSearchTermIdPullListSingleComic(String store, String matches){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where matches = ?", matches);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Gets a search term id.
+     * @param store: The store the search term is from.
      * @param customerid: The person of the matches term.
      * @param searchid: The item of the match.
      * @return

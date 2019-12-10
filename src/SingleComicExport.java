@@ -111,7 +111,7 @@ public class SingleComicExport extends JDialog{
     private void onOk() {
         String selectedItem = inInventory.getSelectedValue().toString();
         //System.out.println(selectedItem);
-        String searchID = Data.DB().getSearchTermIdMatches(Data.Store(), selectedItem);
+        String searchID = Data.DB().getSearchTermIdPullListSingleComic(Data.Store(), selectedItem);
         //System.out.println(searchID);
         Vector <String> customerIDs = Data.DB().getPullListCustomerId(Data.Store(), searchID);
         Vector <String> customerNames = new Vector<>(0);
