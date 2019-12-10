@@ -153,7 +153,7 @@ public class EditCustomer extends JDialog {
      * Opens the pull list editing window. Not yet complete.
      */
     private void onPullList() {
-        new PullLIst().Display(name, email, phone);
+        new PullLIst(customerNameField.getText(), emailAddressField.getText(), phoneNumberField.getText()).Display(customerNameField.getText(), emailAddressField.getText(), phoneNumberField.getText());
         // bring up the pull list editing dialog
     }
 }

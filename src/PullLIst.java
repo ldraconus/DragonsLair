@@ -2,30 +2,27 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.*;
+import java.util.Set;
 import java.util.Vector;
 
 /**
  * Manage customer pull list.
  */
 public class PullLIst extends JDialog {
-    private Vector<String> possibleMatches;
-    private Vector<String> customerRequests;
+    private Vector<String> customerPullsList;
+    private Vector<String> possiblePulls;
     private JPanel contentPane;
-    private JButton buttonOK;
     private JButton buttonCancel;
-    private JTextField textField1;
-    private JTextField textField2;
+    private JTextField requestSearch;
+    private JTextField customerPullsSearch;
     private JButton addToPullButton;
     private JButton addItemButton;
     private JButton removeButton;
-    private JRadioButton nameButton;
-    private JRadioButton issueButton;
-    private JRadioButton diamondButton;
-    private JRadioButton graphicButton;
-    private JRadioButton nonBookButton;
     private JList inInventory;
     private JList customerPulls;
-    private int customerID;
+    private String name;
+    private String email;
+    private String phone;
 
     private static JFrame frame = null;
 
@@ -33,16 +30,15 @@ public class PullLIst extends JDialog {
      * Class constructor.
      * Setup action listeners for UI components.
      */
-    public PullLIst() {
+    public PullLIst(String nameIn, String emailIn, String phoneIn) {
+        name = nameIn;
+        email = emailIn;
+        phone = phoneIn;
+
         setContentPane(contentPane);
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
+        getRootPane().setDefaultButton(buttonCancel);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
 
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -50,14 +46,24 @@ public class PullLIst extends JDialog {
             }
         });
 
-        inInventory.addListSelectionListener(new ListSelectionListener() {
+        addItemButton.addActionListener(new ActionListener() {
             @Override
-            public void valueChanged(ListSelectionEvent listSelectionEvent) { SelectionChanged(); }
+            public void actionPerformed(ActionEvent e) {
+                addItem();
+            }
         });
+
 
         customerPulls.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) { pullListSelectionChanged(); }
+        });
+
+        inInventory.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                selectionChanged();
+            }
         });
 
         // call onCancel() when cross is clicked
@@ -75,57 +81,50 @@ public class PullLIst extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        nameButton.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                SelectionChanged();
-            }
-        });
-
-        diamondButton.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                SelectionChanged();
-            }
-        });
-
-        issueButton.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                SelectionChanged();
-            }
-        });
-
-        nonBookButton.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                SelectionChanged();
-            }
-        });
-
-        graphicButton.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                SelectionChanged();
-            }
-        });
         SetMatchesList(Data.DB().getSearchTermsNames());
-        //nameFill();
+        SetPullsList(Data.DB().getSearchTermNameVector(Data.Store(), Data.DB().getCustomerID(name, phone, email)));
+
+        addToPullButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addToPull();
+            }
+        });
+
+        requestSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                searchPullOptions();
+            }
+        });
+
+        customerPullsSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent c) {
+                searchCustomerPullOptions();
+            }
+        });
+
+        removeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                deleteItem();
+            }
+        });
     }
 
     /**
      * Create a new JFrame and add the initial UI components.
      */
-    public void Display(String name, String email, String phone) {
+    public void Display(String name1, String email1, String phone1) {
         if (frame == null) {
             frame = new JFrame("Dragon's Lair Manage Pull List");
-            frame.setContentPane(new PullLIst().contentPane);
+            frame.setContentPane(new PullLIst(name1, email1, phone1).contentPane);
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             frame.pack();
             frame.setLocationRelativeTo(null);
         }
         frame.setVisible(true);
-        customerID = Data.DB().getCustomerID(name, email, phone);
     }
 
     /**
@@ -145,6 +144,26 @@ public class PullLIst extends JDialog {
     }
 
     /**
+     * Add Search term window.
+     */
+    private void addItem() {
+        new AddSearchTerm().Display();
+        SetMatchesList(Data.DB().getSearchTermsNames());
+    }
+
+    /**
+     * Adds selected item from in inventory list to customers pull list. Quantity is always one as of now.
+     */
+    private void addToPull() {
+        String cuid = Data.DB().getCustomerID(name, phone, email);
+        boolean selected = !inInventory.isSelectionEmpty();
+        if (!selected) return;
+        String searchID = Data.DB().getSearchTermId(Data.Store(), inInventory.getSelectedValue().toString());
+        Data.DB().insertPullList(Data.Store(), cuid, searchID, "1");
+        setPulls();
+    }
+
+    /**
      * Filter the customer list.
      * @param comic Used for filtering.
      */
@@ -155,11 +174,67 @@ public class PullLIst extends JDialog {
         inInventory.setModel(data);
     }
 
+    /**
+     * Filter the customer list.
+     * @param comic Used for filtering.
+     */
     private void SetPullsList(Vector<String> comic) {
         customerPulls.clearSelection();
         DefaultListModel<String> data = new DefaultListModel<String>();
         for (String c: comic) data.addElement(c);
         customerPulls.setModel(data);
+    }
+
+    /**
+     * Updates the customer pull list window
+     */
+    private void setPulls() {
+        customerPulls.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        customerPullsList = Data.DB().getSearchTermNameVector(Data.Store(), Data.DB().getCustomerID(name, phone, email));
+        SetPullsList(customerPullsList);
+        frame.setVisible(true);
+    }
+
+    /**
+     * Removes an item from the customers pull list if an item is selected.
+     */
+    private void deleteItem() {
+        int selectedPosition = customerPulls.getSelectedIndex();
+        Vector<String> pullIds = Data.DB().getPullCustomerId(Data.Store(), Data.DB().getCustomerID(name, phone, email));
+        Data.DB().deletePullList(Data.Store(), pullIds.get(selectedPosition));
+        setPulls();
+        customerPulls.clearSelection();
+        pullListSelectionChanged();
+    }
+
+    /**
+     * Search filter for options to add to the customers pulls.
+     */
+    private void searchPullOptions() {
+        String text = requestSearch.getText();
+        if (text.isEmpty()) {
+            setPossiblePulls();
+            SetMatchesList(possiblePulls);
+            return;
+        }
+        setPossiblePulls();
+        Vector<String> filtered = new Vector<String>();
+        for (String c: possiblePulls) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
+        SetMatchesList(filtered);
+    }
+
+    /**
+     * Search filter for pulls a customer currently has.
+     */
+    private void searchCustomerPullOptions() {
+        String text = customerPullsSearch.getText();
+        if (text.isEmpty()) {
+            setPulls();
+            return;
+        }
+        Vector<String> filtered = new Vector<>();
+        for (String c: customerPullsList) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
+        SetPullsList(filtered);
     }
 
     /**
@@ -170,77 +245,31 @@ public class PullLIst extends JDialog {
     }
 
     /**
-     * Get and set the customer list.
+     * Deselects everything from the current customer pulls side.
      */
-    private void nameFill() {
-        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getSearchTermsNames();
-        SetMatchesList(possibleMatches);
-        frame.setVisible(true);
-    }
-
-    private void diamondFill() {
-        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getSearchTermsDiamond();
-        SetMatchesList(possibleMatches);
-        frame.setVisible(true);
-    }
-
-    private void nonBookFill() {
-        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getSearchTermsNonBook();
-        SetMatchesList(possibleMatches);
-        frame.setVisible(true);
-    }
-
-    private void graphicNovelFill() {
-        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getSearchTermsGraphic();
-        SetMatchesList(possibleMatches);
-        frame.setVisible(true);
-    }
-
-    private void issueNumberFill() {
-        inInventory.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        possibleMatches = Data.DB().getSearchTermsIssue();
-        SetMatchesList(possibleMatches);
-        frame.setVisible(true);
-    }
-
-    private void chooseItems() {
-        if (nameButton.isSelected()) {
-            nameFill();
-        }
-        else if (diamondButton.isSelected()) {
-            diamondFill();
-        }
-        else if (nonBookButton.isSelected()) {
-            nonBookFill();
-        }
-        else if (graphicButton.isSelected()) {
-            graphicNovelFill();
-        }
-        else if (issueButton.isSelected()) {
-            issueNumberFill();
-        }
-    }
-
-    private void createUIComponents() {
-        // TODOo: place custom component creation code here
-        nameButton = new JRadioButton("Name");
+    private void selectionChanged() {
+        customerPulls.clearSelection();
     }
 
     /**
-     * Set the context.
+     * Sets the list of possible pulls that could be added.
      */
-    private void SelectionChanged() {
-        chooseItems();
+    private void setPossiblePulls() {
+        possiblePulls = Data.DB().getSearchTermsNames();
     }
 
+    /**
+     * Clears the selection on the customer side and enables or disables the remove button depending on a selection.
+     */
     private void pullListSelectionChanged() {
-        customerPulls.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        customerRequests = Data.DB().getDiamondCode();
-        SetPullsList(customerRequests);
-        frame.setVisible(true);
+        inInventory.clearSelection();
+        boolean selected = !customerPulls.isSelectionEmpty();
+        if (!selected) {
+            removeButton.setEnabled(false);
+        }
+        else {
+            removeButton.setEnabled(true);
+        }
     }
+
 }

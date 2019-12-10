@@ -93,11 +93,11 @@ public class PrintReports {
     }
 
     private void singleComic() {
-
+        new SingleComicExport().Display();
     }
 
     private void singleCustomer() {
-
+        new SingleCustomerExport().Display();
     }
 
     private void newReleases() {

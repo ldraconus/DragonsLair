@@ -70,7 +70,7 @@ public class ManageComicsForm {
         searchTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                //searchComics();
+                searchComics();
             }
         });
 
@@ -101,16 +101,9 @@ public class ManageComicsForm {
      * Get and set the customer list.
      */
     private void Open() {
-        String[] columns = {"Comic name","Diamond Code"};
-        defaultModel = new DefaultTableModel(columns, 0);
-        comicTable.setModel(defaultModel);
-
         // Retrieve comics from the database and add them to the table model
         comics = Data.DB().getCSVEntries();
-        for(Comic c : comics){
-            Object[] rowData = {c.getTitle(), c.getDiamondCode()};
-            defaultModel.addRow(rowData);
-        }
+        SetUpComicTable(comics);
 
         comicTable.setVisible(true);
         SetContext();
@@ -127,21 +120,37 @@ public class ManageComicsForm {
     }
 
     /**
-     *  [CHANGES NEED] : Search filter
+     * Filter comics.
      */
-    /*
     private void searchComics() {
         String text = searchTextField.getText();
-        if (text.isEmpty()) {
-            SetComicList(comics);
-            SetContext();
+        if(text.isEmpty()){
+            Open();
             return;
         }
-        Vector<String> filtered = new Vector();
-        for (String comic: comics) if (comic.toLowerCase().contains(text.toLowerCase())) filtered.addElement(comic);
-        SetComicList(filtered);
-        SetContext();
-    }*/
+
+        Vector<Comic> filtered = new Vector<>();
+        for (Comic c : comics) {
+            if(c.getTitle().toLowerCase().contains(text.toLowerCase())){
+                filtered.addElement(c);
+            }
+        }
+
+        SetUpComicTable(filtered);
+    }
+
+    private void SetUpComicTable(Vector<Comic> newComics){
+        String[] columns = {"Comic name","Diamond Code"};
+        defaultModel = new DefaultTableModel(columns, 0);
+        comicTable.setModel(defaultModel);
+
+        // Retrieve comics from the database and add them to the table model
+        comics = Data.DB().getCSVEntries();
+        for(Comic c : newComics){
+            Object[] rowData = {c.getTitle(), c.getDiamondCode()};
+            defaultModel.addRow(rowData);
+        }
+    }
 
     /**
      * Delete a comic to the database and JTable.

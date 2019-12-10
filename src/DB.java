@@ -491,6 +491,24 @@ public class DB {
     }
 
     /**
+     * Returns the name of the store for a particular user.
+     * @param store: The name of the store to use.
+     * @param id: the customer id to look up.
+     * @return: The name of the store.
+     */
+    public String GetCustomerName(String store, String id) {
+        db.ExecuteStatement("use " + store);
+        ResultSet r = db.ExecutePrepared("select * from customer where id = ? ", id);
+        if (r == null) return "";
+        try {
+            if (!r.next()) return "";
+            return r.getString("name");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
      * Determines if a customer exists in the given store.
      * @param store: The store the customer visited.
      * @param customer: The name of the customer.
@@ -1014,22 +1032,28 @@ public class DB {
         return csvEntries;
     }
 
-    public int getCustomerID(String name, String phone, String email) {
-        int customerID = -1;
+    public String getCustomerID(String name, String phone, String email) {
+        String customerID = "";
         db.ExecuteStatement("use " + Data.Store());
         ResultSet data = db.ExecutePrepared("select id from customer where name = ? AND phone = ? AND email = ?", name, phone, email);
 
+        if (data == null) return customerID;
         try {
+            if (!data.next()) return customerID;
+            return data.getString("id");
+        } catch (Exception e) {
+            System.out.println(e);
+        } return customerID;
+        /*try {
             if (data != null) {
-                while (data.next()) {
                     customerID = Integer.parseInt(data.getString("id"));
-                }
+                //}
             }
         } catch (Exception e) {
             System.out.println(e);
         }
 
-        return customerID;
+        return customerID;*/
     }
 
     /**
@@ -1155,6 +1179,127 @@ public class DB {
     }
 
     /**
+     * Gets a search term id.
+     * @param store: The store the search term is from.
+     * @param id: The id in the pull list.
+     * @return
+     */
+    public String getSearchTermIdPullList(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet data = db.ExecutePrepared("select * from pull_list where id = ?", id);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("searchTerm_id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Gets a match name from searchTerms.
+     * @param store: The store the search term is from.
+     * @param id: The id in the searchTerm.
+     * @return
+     */
+    public String getSearchTermMatch(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where id = ?", id);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("matches");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Gets a search term id.
+     * @param store: The store the search term is from.
+     * @param id: The id of the search term.
+     * @return
+     */
+    public String getSearchTermIdMatches(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where id = ?", id);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("matches");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Gets a search term id.
+     * @param store: The store the search term is from.
+     * @param id: The id of the search term.
+     * @return
+     */
+    public String getSearchTermIdPullListSingleComic(String store, String matches){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where matches = ?", matches);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Gets a search term id.
+     * @param store: The store the search term is from.
+     * @param customerid: The person of the matches term.
+     * @param searchid: The item of the match.
+     * @return
+     */
+    public String getPullQuantity(String store, String customerid, String searchid){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet data = db.ExecutePrepared("select * from pull_list where customer_id = ? AND searchTerm_id = ?", customerid, searchid);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("number");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
+     * Gets a search term id.
+     * @param store: The store the search term is from.
+     * @param searchid: The item of the match.
+     * @return
+     */
+    public String getPullQuantityID(String store, String searchid){
+        db.ExecuteStatement("use " + store);
+
+        ResultSet data = db.ExecutePrepared("select * from pull_list where id = ?", searchid);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("number");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+    }
+
+    /**
      * Given a customer id, returns the name of a search term.
      * @param store: The store the customer is associated with.
      * @param id: The customer's id.
@@ -1242,13 +1387,88 @@ public class DB {
     }
 
     /**
+     * Gets the customer id's from the pull list.
+     * @param store: The store the customer's are associated with.
+     * @param id: The customer id.
+     * @return
+     */
+    public Vector<String> getPullListCustomerId(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        Vector<String> theIds = new Vector<String>();
+        ResultSet termid = db.ExecutePrepared("select * from pull_list where searchTerm_id = ?", id);
+
+        try {
+            if (termid != null) {
+                while (termid.next()) {
+                    theIds.add(termid.getString("customer_id"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return theIds;
+    }
+
+    /**
+     * Gets the customer id's from the pull list.
+     * @param store: The store the customer's are associated with.
+     * @param id: The customer id.
+     * @return
+     */
+    public Vector<String> getPullListIDs(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        Vector<String> theIds = new Vector<String>();
+        ResultSet termid = db.ExecutePrepared("select * from pull_list where customer_id = ?", id);
+
+        try {
+            if (termid != null) {
+                while (termid.next()) {
+                    theIds.add(termid.getString("id"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return theIds;
+    }
+
+    /**
+     * Gets the customer id's from the pull list.
+     * @param store: The store the customer's are associated with.
+     * @param id: The customer id.
+     * @return
+     */
+    public Vector<String> getPullListQuantity(String store, String id){
+        db.ExecuteStatement("use " + store);
+
+        Vector<String> theIds = new Vector<String>();
+        ResultSet termid = db.ExecutePrepared("select * from pull_list where customer_id = ?", id);
+
+        try {
+            if (termid != null) {
+                while (termid.next()) {
+                    theIds.add(termid.getString("number"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return theIds;
+    }
+
+    /**
      * Deletes a pull list table based on an id.
      * @param store: The store being used.
      * @param id: The customer id.
      */
     public void deletePullList(String store, String id){
         db.ExecuteStatement("use " + store);
-        db.ExecuteData("delete from pull_list where customer_id = ?", id);
+        db.ExecuteData("delete from pull_list where id = ?", id);
     }
 
     /**
