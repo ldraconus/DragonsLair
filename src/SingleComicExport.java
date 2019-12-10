@@ -142,6 +142,9 @@ public class SingleComicExport extends JDialog{
         searchPullOptions();
     }
 
+    /**
+     * Dispose the window.
+     */
     private void onCancel() {
         if (frame != null) { frame.dispose(); }
     }
