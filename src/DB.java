@@ -1248,7 +1248,7 @@ public class DB {
      */
     public void deletePullList(String store, String id){
         db.ExecuteStatement("use " + store);
-        db.ExecutePrepared("delete from pull_list where customer_id = ?", id);
+        db.ExecuteData("delete from pull_list where customer_id = ?", id);
     }
 
     /**
