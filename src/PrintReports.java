@@ -97,7 +97,7 @@ public class PrintReports {
     }
 
     private void singleCustomer() {
-
+        new SingleCustomerExport().Display();
     }
 
     private void newReleases() {
