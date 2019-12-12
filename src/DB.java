@@ -1097,6 +1097,31 @@ public class DB {
     }
 
     /**
+     * Returns all the csvEntries containing the name specified from search terms.
+     * @param store: The store the csvEntries are from.
+     * @param name: The name from the searchTerms that is provided.
+     * @return
+     */
+    public Vector<String> getCsvEntriesNames(String store, String name){
+        Vector<String> entries = new Vector<String>();
+        String search = "%" + name +"%";
+        db.ExecuteStatement("use " + store);
+        ResultSet returns = db.ExecutePrepared("Select * from csvEntries where title like ?", search);
+
+        try {
+            if (returns != null) {
+                while (returns.next()) {
+                    entries.add(returns.getString("title"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return entries;
+    }
+
+    /**
      * This is the first step in the pull processing. Pulls all the csv entries based on the date id.
      * @param store: The store the csv entries are from.
      * @param date: The date the user searches by.
@@ -1179,6 +1204,33 @@ public class DB {
 
         db.ExecuteData("insert into searchTerms(name,diamond,issue,graphicNovel,nonBook,matches) " + "values(?,?,?,?,?,?)",
                 name, diamond, issue, graphicNovel,nonBook,matches);
+    }
+
+    /**
+     * Deletes a search term from the searchTerms table.
+     * @param store: The store the table is associated with.
+     * @param name: The name of the search term being deleted.
+     */
+    public void deleteSearchTerms(String store, String name){
+        db.ExecutePrepared("use " + store);
+        String things = getSearchTermID(store, name);
+        System.out.printf("Search term id: %s\n", things);
+        db.ExecuteData("delete from pull_list where searchTerm_id = ?", things);
+        db.ExecuteData("delete from searchTerms where name = ?", name);
+    }
+
+    private String getSearchTermID(String store, String name) {
+        db.ExecutePrepared("use " + store);
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where name = ?", name);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+
     }
 
     /**

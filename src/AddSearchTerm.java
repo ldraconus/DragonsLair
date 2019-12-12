@@ -3,7 +3,6 @@ import java.awt.event.*;
 import java.util.Vector;
 
 public class AddSearchTerm extends JFrame{
-    private Vector<String> possiblePulls;
     private JTextField diamondCodeField;
     private JTextField issueField;
     private JTextField displayNameField;
@@ -12,7 +11,6 @@ public class AddSearchTerm extends JFrame{
     private JButton okButton;
     private JButton cancelButton;
     private JPanel contentPane;
-    private JList inInventory;
     private JTextField searchField;
 
     private static JFrame frame = null;
@@ -37,14 +35,6 @@ public class AddSearchTerm extends JFrame{
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        searchField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                searchNames();
-            }
-        });
-
-        SetMatchesList(Data.DB().getCsvEntries());
     }
 
     private void onCancel() {
@@ -69,71 +59,44 @@ public class AddSearchTerm extends JFrame{
         String displayName = displayNameField.getText();
         String diamondName = diamondCodeField.getText();
         String issueName = issueField.getText();
-        String inventorySelection = null;
-        if (!inInventory.isSelectionEmpty()) {
-            inventorySelection = inInventory.getSelectedValue().toString();
-        }
+        String matchTerm = searchField.getText();
         String graphicNovel = graphicCheckBox.isSelected() ? "1" : "0";
         String nonBook = nonBookCheckBox.isSelected() ? "1" : "0";
-
 
         if (displayName.compareTo("") == 0) {
             String message = "Please enter a display name";
             JOptionPane.showMessageDialog(null, message);
             return;
         }
-        else if (inventorySelection == null) {
-            String message = "Please select an item for this name to match to.";
-            JOptionPane.showMessageDialog(null, message);
-            return;
-        }
 
-        if (diamondName.isEmpty()) {
+        if (diamondName.length() == 0) {
             diamondName = null;
         }
 
-        if (issueName.isEmpty()) {
+        if (issueName.length() == 0) {
             issueName = null;
         }
 
-        Data.DB().insertSearchTerms(Data.Store(), displayName, diamondName, issueName,graphicNovel, nonBook, inventorySelection);
-        updatePossiblePulls();
+        /*if (!checkExtra(diamondName, issueName, graphicNovel, nonBook)) {
+            JOptionPane.showMessageDialog(null, "Please only have one field filled out.");
+            return;
+        }*/
+
+        Data.DB().insertSearchTerms(Data.Store(), displayName, diamondName, issueName,graphicNovel, nonBook, matchTerm);
         onCancel();
     }
 
-    /**
-     * Filter the customer list.
-     * @param comic Used for filtering.
-     */
-    private void SetMatchesList(Vector<String> comic) {
-        inInventory.clearSelection();
-        DefaultListModel<String> data = new DefaultListModel<String>();
-        for (String c: comic) data.addElement(c);
-        inInventory.setModel(data);
-    }
+    private boolean checkExtra(String first, String second, String graphic, String other) {
+        int nullCount = 0;
 
-    /**
-     * Sets the list of possible pulls that could be added.
-     */
-    private void setPossiblePulls() {
-        possiblePulls = Data.DB().getCsvEntries();
-    }
+        if ((first == null)) {nullCount++;}
+        if ((second == null)) {nullCount++;}
+        if (graphic.equals("1")) {nullCount++;}
+        if (other.equals("1")) {nullCount++;}
 
-    private void updatePossiblePulls() {
-        setPossiblePulls();
-        SetMatchesList(possiblePulls);
-    }
+        System.out.printf("Null count: %d\n", nullCount);
 
-    private void searchNames() {
-        String text = searchField.getText();
-        if (text.isEmpty()) {
-            setPossiblePulls();
-            SetMatchesList(possiblePulls);
-            return;
-        }
-        setPossiblePulls();
-        Vector<String> filtered = new Vector<String>();
-        for (String c: possiblePulls) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
-        SetMatchesList(filtered);
+        if (nullCount == 1) {return true;}
+        else {return false;}
     }
 }

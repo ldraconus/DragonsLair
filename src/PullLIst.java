@@ -20,6 +20,8 @@ public class PullLIst extends JDialog {
     private JButton removeButton;
     private JList inInventory;
     private JList customerPulls;
+    private JTextField quantityField;
+    private JButton removeItemButton;
     private String name;
     private String email;
     private String phone;
@@ -98,6 +100,13 @@ public class PullLIst extends JDialog {
             }
         });
 
+        quantityField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                quantityChanged();
+            }
+        });
+
         customerPullsSearch.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent c) {
@@ -111,6 +120,14 @@ public class PullLIst extends JDialog {
                 deleteItem();
             }
         });
+        removeItemButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeFromSearchTerms();
+            }
+        });
+
+        selectionChanged();
     }
 
     /**
@@ -149,6 +166,8 @@ public class PullLIst extends JDialog {
     private void addItem() {
         new AddSearchTerm().Display();
         SetMatchesList(Data.DB().getSearchTermsNames());
+        setPulls();
+        searchPullOptions();
     }
 
     /**
@@ -159,8 +178,10 @@ public class PullLIst extends JDialog {
         boolean selected = !inInventory.isSelectionEmpty();
         if (!selected) return;
         String searchID = Data.DB().getSearchTermId(Data.Store(), inInventory.getSelectedValue().toString());
-        Data.DB().insertPullList(Data.Store(), cuid, searchID, "1");
+        Data.DB().insertPullList(Data.Store(), cuid, searchID, quantityField.getText());
         setPulls();
+        searchPullOptions();
+        searchCustomerPullOptions();
     }
 
     /**
@@ -249,6 +270,14 @@ public class PullLIst extends JDialog {
      */
     private void selectionChanged() {
         customerPulls.clearSelection();
+
+        boolean selected = !inInventory.isSelectionEmpty();
+        if (!selected) {
+            removeItemButton.setEnabled(false);
+        }
+        else {
+            removeItemButton.setEnabled(true);
+        }
     }
 
     /**
@@ -272,4 +301,20 @@ public class PullLIst extends JDialog {
         }
     }
 
+    private void quantityChanged() {
+        String fieldValue = quantityField.getText();
+        if (fieldValue.isEmpty()) {
+            addToPullButton.setEnabled(false);
+        }
+        else {
+            addToPullButton.setEnabled(true);
+        }
+    }
+
+    private void removeFromSearchTerms() {
+       String selected = inInventory.getSelectedValue().toString();
+       Data.DB().deleteSearchTerms(Data.Store(), selected);
+       setPulls();
+       searchPullOptions();
+    }
 }
