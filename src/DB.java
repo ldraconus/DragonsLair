@@ -1590,6 +1590,21 @@ public class DB {
         }
     }
 
+    /**
+     * Grabs all the information to do exporting for all customer.
+     * @param store: The store being used
+     * @return
+     */
+    public ResultSet customerExport(String store){
+
+        db.ExecutePrepared("use " + store);
+        ResultSet theData = db.ExecutePrepared("select customer.name, customer.id, matches, pull_List.number " +
+                "from customer, pull_list, searchTerms " +
+                "searchTerms.id = searchTerm_id and customer_id = customer.id");
+
+        return theData;
+    }
+
 
 
     /****************************************************************************************************
