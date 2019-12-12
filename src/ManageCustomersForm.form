@@ -15,11 +15,9 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="411e8" class="javax.swing.JList" binding="customerList">
+          <component id="294e3" class="javax.swing.JTable" binding="customerTable">
             <constraints/>
-            <properties>
-              <font name="Comic Sans MS" size="14" style="0"/>
-            </properties>
+            <properties/>
           </component>
         </children>
       </scrollpane>

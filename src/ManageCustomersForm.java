@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.*;
 import java.util.Vector;
 
@@ -15,10 +16,12 @@ public class ManageCustomersForm {
     private JButton doneButton;
     private JTextField searchTextField;
     private JPanel manageCustomersPanel;
+    private JTable customerTable;
 
     private static JFrame frame = null;
 
-    private Vector<String> customers;
+    DefaultTableModel defaultModel;
+    private Vector<Customer> customers;
 
     /**
      * Dispose of the JFrame.
@@ -61,10 +64,7 @@ public class ManageCustomersForm {
             public void windowOpened(WindowEvent we) { Open(); }
         });
 
-        customerList.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent listSelectionEvent) { SelectionChanged(); }
-        });
+
         
         searchTextField.addKeyListener(new KeyListener() {
             @Override
@@ -80,7 +80,14 @@ public class ManageCustomersForm {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 /* ignore */
-                searchCustomers();
+                //searchCustomers();
+            }
+        });
+
+        customerTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                SetContext();
             }
         });
 
@@ -105,26 +112,27 @@ public class ManageCustomersForm {
     /**
      * Search filter
      */
+    /*
     private void searchCustomers() {
         String text = searchTextField.getText();
         if (text.isEmpty()) {
-            SetCustomerList(customers);
+            SetUpCustomerTable(customers);
             SetContext();
             return;
-        }
+        }//TODO make search work with JTable
         Vector<String> filtered = new Vector<String>();
-        for (String c: customers) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
+        for (Customer c: customers) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
         SetCustomerList(filtered);
         SetContext();
-    }
+    }*/
 
     /**
      * Enable or disable add, delete, and edit.
      */
     private void SetContext() {
         addButton.setEnabled(true);
-        deleteButton.setEnabled(!customerList.isSelectionEmpty());
-        editButton.setEnabled(!customerList.isSelectionEmpty());
+        deleteButton.setEnabled(!customerTable.getSelectionModel().isSelectionEmpty());
+        editButton.setEnabled(!customerTable.getSelectionModel().isSelectionEmpty());
     }
 
     /**
@@ -138,13 +146,28 @@ public class ManageCustomersForm {
         customerList.setModel(data);
     }
 
+    private void SetUpCustomerTable(Vector<Customer> newCustomers){
+        String[] columns = {"ID","Name", "Phone Number", "Email"};
+        defaultModel = new DefaultTableModel(columns, 0);
+        customerTable.setModel(defaultModel);
+
+        // Retrieve comics from the database and add them to the table model
+        customers = Data.DB().GetCustomers();
+        for(Customer c : newCustomers){
+            Object[] rowData = {c.getID(), c.getName(), c.getPhone(), c.getEmail()};
+            defaultModel.addRow(rowData);
+        }
+    }
+
     /**
      * Get and set the customer list.
      */
     private void Open() {
         //customerList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         customers = Data.DB().GetCustomers();
-        SetCustomerList(customers);
+        SetUpCustomerTable(customers);
+        customerTable.setVisible(true);
+
         SetContext();
         frame.setVisible(true);
     }
@@ -156,13 +179,13 @@ public class ManageCustomersForm {
         new AddCustomer();
         if (AddCustomer.isOk()) {
             String name = AddCustomer.Name();
-            if (Data.DB().CustomerExists(Data.Store(), name)) return;
             String email = AddCustomer.EMail();
             String phone = AddCustomer.Phone();
+            if (Data.DB().CustomerExists(Data.Store(), name, email, phone)) return;
             Data.DB().AddCustomer(Data.Store(), name, email, phone);
             searchTextField.setText("");
             customers = Data.DB().GetCustomers();
-            SetCustomerList(customers);
+            SetUpCustomerTable(customers);
             SetContext();
         }
     }
@@ -171,21 +194,24 @@ public class ManageCustomersForm {
      * Edit customer.
      */
     private void Edit() {
-        boolean selected = !customerList.isSelectionEmpty();
-        if (!selected) return;
-        String origCustomer = customerList.getSelectedValue();
-        String email = Data.DB().GetCustomerEMail(Data.Store(), origCustomer);
-        String phone = Data.DB().GetCustomerPhone(Data.Store(), origCustomer);
-        new EditCustomer(origCustomer, email, phone);
+        if(customerTable.getSelectionModel().isSelectionEmpty())
+            return;
+        int selectedRow = customerTable.getSelectedRow();
+        String id = customerTable.getModel().getValueAt(selectedRow, 0).toString();
+        String name = Data.DB().GetCustomerName(Data.Store(), id);
+        String email = Data.DB().GetCustomerEMail(Data.Store(), id);
+        String phone = Data.DB().GetCustomerPhone(Data.Store(), id);
+        new EditCustomer(name, email, phone);
         if (EditCustomer.isOk()) {
-            String customer = EditCustomer.Name();
-            if (customer.equals(origCustomer)) return;
-            if (customer.isEmpty()) return;
-            if (Data.DB().CustomerExists(Data.Store(), customer)) return;
-            Data.DB().UpdateCustomer(Data.Store(), origCustomer, customer, email, phone);
+            String newName = EditCustomer.Name();
+            String newPhone = EditCustomer.Phone();
+            String newEmail = EditCustomer.EMail();
+            if (newName.equals(name) && newPhone.equals(phone) && newEmail.equals(email)) return;
+            if (newName.isEmpty()) return;
+            Data.DB().UpdateCustomer(Data.Store(), id, newName, newEmail, newPhone);
             searchTextField.setText("");
             customers = Data.DB().GetCustomers();
-            SetCustomerList(customers);
+            SetUpCustomerTable(customers);
             SetContext();
         }
     }
@@ -194,14 +220,19 @@ public class ManageCustomersForm {
      * Delete customer.
      */
     private void Delete() {
-        boolean selected = !customerList.isSelectionEmpty();
-        if (!selected) return;
-        String origCustomer = customerList.getSelectedValue();
-        Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + origCustomer + "?");
+        if(customerTable.getSelectionModel().isSelectionEmpty())
+            return;
+
+        int selectedRow = customerTable.getSelectedRow();
+        String customerID = customerTable.getModel().getValueAt(selectedRow, 0).toString();
+        String customerName = customerTable.getModel().getValueAt(selectedRow, 1).toString();
+        Message msg = new Message(Message.YesNoMessage, "Are you sure you want to delete " + customerName + "?");
+
         if (msg.getButton() == Message.NoButton) return;
-        Data.DB().DeleteCustomer(Data.Store(), origCustomer);
+
+        Data.DB().DeleteCustomer(Data.Store(), customerID);
         customers = Data.DB().GetCustomers();
-        SetCustomerList(customers);
+        SetUpCustomerTable(customers);
         SetContext();
     }
 
