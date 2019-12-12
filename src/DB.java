@@ -1190,7 +1190,24 @@ public class DB {
      */
     public void deleteSearchTerms(String store, String name){
         db.ExecutePrepared("use " + store);
+        String things = getSearchTermID(store, name);
+        System.out.printf("Search term id: %s\n", things);
+        db.ExecuteData("delete from pull_list where searchTerm_id = ?", things);
         db.ExecuteData("delete from searchTerms where name = ?", name);
+    }
+
+    private String getSearchTermID(String store, String name) {
+        db.ExecutePrepared("use " + store);
+        ResultSet data = db.ExecutePrepared("select * from searchTerms where name = ?", name);
+
+        if (data == null) return "";
+        try {
+            if (!data.next()) return "";
+            return data.getString("id");
+        }
+        catch (Exception e) { System.out.println(e); }
+        return "";
+
     }
 
     /**
