@@ -473,7 +473,7 @@ public class DB {
      * Returns all the customers from the database.
      * @return: A vector with all the customers.
      */
-    public Vector<String> GetCustomers() {
+    public Vector<String> GetCustomersName() {
         Vector<String> customers = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
         ResultSet data = db.ExecutePrepared("select name from customer");
@@ -482,6 +482,27 @@ public class DB {
             if (data != null) {
                 while (data.next()) {
                     customers.add(data.getString("name"));
+                }
+            }
+        }
+        catch(Exception e) { System.out.println(e); }
+
+        return customers;
+    }
+
+    /**
+     * Returns all the customers from the database.
+     * @return: A vector with all the customers.
+     */
+    public Vector<Customer> GetCustomers() {
+        Vector<Customer> customers = new Vector<>();
+        db.ExecuteStatement("use " + Data.Store());
+        ResultSet data = db.ExecutePrepared("select * from customer");
+
+        try {
+            if (data != null) {
+                while (data.next()) {
+                    customers.add(new Customer(data.getString("id"), data.getString("name"), data.getString("phone"), data.getString("email")));
                 }
             }
         }
@@ -511,14 +532,16 @@ public class DB {
     /**
      * Determines if a customer exists in the given store.
      * @param store: The store the customer visited.
-     * @param customer: The name of the customer.
+     * @param name: The name of the customer.
+     * @param email: The email address of the customer.
+     * @param phone: The phone number of the customer
      * @return
      */
-    public boolean CustomerExists(String store, String customer) {
+    public boolean CustomerExists(String store, String name, String email, String phone) {
         db.ExecuteStatement("use " + store);
         ResultSet data = db.ExecutePrepared("select id " +
                 "from customer " +
-                "where name = ?", customer);
+                "where name = ? AND email = ? AND phone = ? ", name, email, phone);
         try { return data != null && data.next(); }
         catch (Exception e) { System.out.println(e); }
         return false;
@@ -540,13 +563,13 @@ public class DB {
     /**
      * Returns the customer's email.
      * @param store: The name of the store with the customer.
-     * @param name: The name of the customer.
+     * @param id: The id of the customer.
      * @return
      */
-    public String GetCustomerEMail(String store, String name) {
+    public String GetCustomerEMail(String store, String id) {
         db.ExecuteStatement("use " + store);
         ResultSet r = db.ExecutePrepared("select email from customer " +
-                "where name = ? ", name);
+                "where id = ? ", id);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -559,13 +582,13 @@ public class DB {
     /**
      * Returns the customer's phone number.
      * @param store: The store the customer is associated with.
-     * @param name: The name of the customer.
+     * @param id: The id of the customer.
      * @return: The customer's phone number.
      */
-    public String GetCustomerPhone(String store, String name) {
+    public String GetCustomerPhone(String store, String id) {
         db.ExecuteStatement("use " + store);
         ResultSet r = db.ExecutePrepared("select customer.phone from customer " +
-                "where customer.name = ? ", name);
+                "where customer.id = ? ", id);
         if (r == null) return "";
         try {
             if (!r.next()) return "";
@@ -600,26 +623,26 @@ public class DB {
     /**
      * Updates a customer value.
      * @param store: The store the customer is associated with.
-     * @param origCustomer: The original name of the customer.
+     * @param id: The unique ID of the customer.
      * @param customer: The new name of the customer.
      * @param email: The new email for the customer.
      * @param phone: The new phone for the customer.
      */
-    public void UpdateCustomer(String store, String origCustomer, String customer, String email, String phone) {
+    public void UpdateCustomer(String store, String id, String customer, String email, String phone) {
         db.ExecuteStatement("use " + store);
-        db.ExecuteData("update customer set name=?, email=?, phone=? where name=?",
-                customer, email, phone, origCustomer);
+        db.ExecuteData("update customer set name=?, email=?, phone=? where id=?",
+                customer, email, phone, id);
     }
 
     /**
      * Deletes a customer from the database.
      * @param store: The store the customer is from.
-     * @param origCustomer: The name of the customer being deleted.
+     * @param id: The name of the customer being deleted.
      */
-    public void DeleteCustomer(String store, String origCustomer) {
+    public void DeleteCustomer(String store, String id) {
         db.ExecuteStatement("use " + store);
-        db.ExecuteData("delete from customer where name=?",
-                origCustomer);
+        db.ExecuteData("delete from customer where id=?",
+                id);
     }
 
     /**
@@ -1293,6 +1316,7 @@ public class DB {
     /**
      * Gets a search term id.
      * @param store: The store the search term is from.
+     * @param matches: The id of the search term.
      * @return
      */
     public String getSearchTermIdPullListSingleComic(String store, String matches){

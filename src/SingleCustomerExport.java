@@ -50,7 +50,7 @@ public class SingleCustomerExport {
             public void valueChanged(ListSelectionEvent e) { SelectionChanged(); }
         });
 
-        SetMatchesList(Data.DB().GetCustomers());
+        SetMatchesList(Data.DB().GetCustomersName());
         SelectionChanged();
     }
 
@@ -83,7 +83,7 @@ public class SingleCustomerExport {
      * Sets the list of customerNames.
      */
     private void setCustomerNames() {
-        customerNames = Data.DB().GetCustomers();
+        customerNames = Data.DB().GetCustomersName();
     }
 
     /**
