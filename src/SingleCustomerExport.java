@@ -7,11 +7,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Vector;
+import java.sql.ResultSet;
+import java.util.*;
 
+/**
+ * Single customer export handle exporting all of the items that a single customer receives and the quantity of each.
+ */
 public class SingleCustomerExport {
     private Vector<String> customerNames;
     private JButton exportButton;
@@ -22,6 +23,9 @@ public class SingleCustomerExport {
 
     private static JFrame frame = null;
 
+    /**
+     * Constructor. Sets up all actions regarding the JFrame.
+     */
     public SingleCustomerExport() {
 
         doneButton.addActionListener(new ActionListener() {
@@ -122,53 +126,50 @@ public class SingleCustomerExport {
         if (frame != null) { frame.dispose(); }
     }
 
+    /**
+     * Runs when the export button is pressed. Responsible for getting all required information and formatting
+     * the data nicely for output.
+     */
     private void onOk() {
         String selectedItem = customerList.getSelectedValue().toString();
         String customerID = Data.DB().getCustomerId(Data.Store(), selectedItem);
-        System.out.println(customerID);
-        Vector <String> pullIDs = Data.DB().getPullListIDs(Data.Store(), customerID);
-        Vector <String> pullQuantities = Data.DB().getPullListQuantity(Data.Store(), customerID);
-        Vector <String> pullNames = new Vector<>(0);
-        Vector <String> searchTermIDs = new Vector<>(0);
+        ResultSet data = Data.DB().singleCustomerExport(Data.Store(), customerID);
+        boolean firstRun = true;
+        Vector <ResultType> results = new Vector<>(0);
+        String output = "";
 
-        Iterator it = pullIDs.iterator();
-        while (it.hasNext()) {
-            String id = it.next().toString();
-            pullQuantities.add(Data.DB().getPullQuantityID(Data.Store(), id));
-            searchTermIDs.add(Data.DB().getSearchTermIdPullList(Data.Store(), id));
+        try {
+            while (data.next()) {
+
+                results.add(new ResultType(data.getString("name"), data.getString("id"),
+                        data.getString("matches"), data.getString("number")));
+
+            }
+        } catch (Exception e) {
+            System.err.println("Exception: "
+                +e.getMessage());
         }
 
-        Iterator iter = searchTermIDs.iterator();
-        while (iter.hasNext()) {
-            String id = iter.next().toString();
-            pullNames.add(Data.DB().getSearchTermIdMatches(Data.Store(), id));
-        }
+        int outside = results.size();
+        //System.out.printf("Outside length: %d\n", outside);
+        for (int i = 0; i < outside; i++) {
+            //System.out.printf("Loop number: %s. Search Term: %s\n", i, results.get(i).getMatches());
+            if (firstRun) {
+                System.out.println(results.get(i).getCustomerName());
+                output += results.get(i).getCustomerName();
+                firstRun = false;
+            }
 
-        int totalLength = pullIDs.size();
-        if (totalLength == 0) {
-            JOptionPane.showMessageDialog(null, "This person receives no items.");
-            customerList.clearSelection();
-            searchField.setText("");
-            setCustomerNames();
-            return;
-        }
-        ArrayList <PullRequest> items = new ArrayList <>();
-        for (int i = 0; i < totalLength; i++) {
-            items.add(new PullRequest(pullNames.get(i), pullQuantities.get(i)));
-        }
+            Vector <String> titles = Data.DB().getCsvEntriesNames(Data.Store(), results.get(i).getMatches());
+            int inside = titles.size();
+            for (int j = 0; j < inside; j++) {
+                System.out.printf("\tTitle: %s.\n\t\tQuantity: %s\n", titles.get(j), results.get(i).getQuantity());
+                output += "\tTitle: " + titles.get(i) + "\n\t\tQuantity: " + results.get(i).getQuantity() + "\n";
+            }
 
-        Collections.sort(items);
-
-        String output = selectedItem + "'s Pulls\n\n";
-        for (int i = 0; i < totalLength; i++) {
-            //System.out.printf("%s", items.get(i).toString());
-            output += items.get(i).toString();
         }
-
         new OutputFiles().Display(output);
-
         customerList.clearSelection();
-        searchField.setText("");
-        setCustomerNames();
+        SelectionChanged();
     }
 }
