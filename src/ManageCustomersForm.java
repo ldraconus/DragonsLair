@@ -137,13 +137,6 @@ public class ManageCustomersForm {
         }
 
         SetUpCustomerTable(filtered);
-        Vector<Customer> filtered = new Vector<>();
-        for (Customer c: customers)
-            if (c.getName().toLowerCase().contains(text.toLowerCase())) {
-                filtered.addElement(c);
-            }
-        SetUpCustomerTable(filtered);
-        SetContext();
     }
 
     /**
