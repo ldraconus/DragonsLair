@@ -1,4 +1,3 @@
-
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -14,7 +13,6 @@ import java.util.*;
  * Single customer export handle exporting all of the items that a single customer receives and the quantity of each.
  */
 public class SingleCustomerExport {
-    private Vector<String> customerNames;
     private JButton exportButton;
     private JPanel contentPane;
     private JButton doneButton;
@@ -159,8 +157,6 @@ public class SingleCustomerExport {
      * the data nicely for output.
      */
     private void onOk() {
-        //String selectedItem = customerTable.getSelectedColumn(0);
-        //String customerID = Data.DB().getCustomerId(Data.Store(), selectedItem);
         String customerID = customerTable.getModel().getValueAt(customerTable.getSelectedRow(), 0).toString();
         ResultSet data = Data.DB().singleCustomerExport(Data.Store(), customerID);
         boolean firstRun = true;
@@ -180,11 +176,17 @@ public class SingleCustomerExport {
         }
 
         int outside = results.size();
+        if (outside < 1) {
+            JOptionPane.showMessageDialog(null, "This customer receives no items.");
+            customerTable.clearSelection();
+            return;
+        }
+
         //System.out.printf("Outside length: %d\n", outside);
         for (int i = 0; i < outside; i++) {
             //System.out.printf("Loop number: %s. Search Term: %s\n", i, results.get(i).getMatches());
             if (firstRun) {
-                System.out.println(results.get(i).getCustomerName());
+                //System.out.println(results.get(i).getCustomerName());
                 output += results.get(i).getCustomerName();
                 firstRun = false;
             }
@@ -192,13 +194,12 @@ public class SingleCustomerExport {
             Vector <String> titles = Data.DB().getCsvEntriesNames(Data.Store(), results.get(i).getMatches());
             int inside = titles.size();
             for (int j = 0; j < inside; j++) {
-                System.out.printf("\tTitle: %s.\n\t\tQuantity: %s\n", titles.get(j), results.get(i).getQuantity());
+                //System.out.printf("\tTitle: %s.\n\t\tQuantity: %s\n", titles.get(j), results.get(i).getQuantity());
                 output += "\tTitle: " + titles.get(i) + "\n\t\tQuantity: " + results.get(i).getQuantity() + "\n";
             }
 
         }
         new OutputFiles().Display(output);
-        //customerList.clearSelection();
         customerTable.clearSelection();
         SelectionChanged();
     }
