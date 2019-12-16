@@ -137,6 +137,13 @@ public class ManageCustomersForm {
         }
 
         SetUpCustomerTable(filtered);
+        Vector<Customer> filtered = new Vector<>();
+        for (Customer c: customers)
+            if (c.getName().toLowerCase().contains(text.toLowerCase())) {
+                filtered.addElement(c);
+            }
+        SetUpCustomerTable(filtered);
+        SetContext();
     }
 
     /**
@@ -158,7 +165,7 @@ public class ManageCustomersForm {
         customerTable.setModel(defaultModel);
         customerTable.setDefaultEditor(Object.class, null);
 
-        // Retrieve comics from the database and add them to the table model
+        // Retrieve customers from the database and add them to the table model
         customers = Data.DB().GetCustomers();
         for(Customer c : newCustomers){
             Object[] rowData = {c.getID(), c.getName(), c.getPhone(), c.getEmail()};
@@ -170,7 +177,6 @@ public class ManageCustomersForm {
      * Get and set the customer list.
      */
     private void Open() {
-        //customerList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         customers = Data.DB().GetCustomers();
         SetUpCustomerTable(customers);
         customerTable.setVisible(true);
@@ -214,7 +220,8 @@ public class ManageCustomersForm {
             String newPhone = EditCustomer.Phone();
             String newEmail = EditCustomer.EMail();
             if (newName.equals(name) && newPhone.equals(phone) && newEmail.equals(email)) return;
-            if (newName.isEmpty()) return;
+            if (newName.isEmpty() || newPhone.isEmpty() && newEmail.isEmpty()) return;
+            if (Data.DB().CustomerExists(Data.Store(), newName, newEmail, newPhone)) return;
             Data.DB().UpdateCustomer(Data.Store(), id, newName, newEmail, newPhone);
             searchTextField.setText("");
             customers = Data.DB().GetCustomers();
