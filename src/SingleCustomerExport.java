@@ -1,8 +1,8 @@
-//import com.sun.codemodel.internal.JOp;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -19,9 +19,12 @@ public class SingleCustomerExport {
     private JPanel contentPane;
     private JButton doneButton;
     private JTextField searchField;
-    private JList customerList;
+    private JTable customerTable;
 
     private static JFrame frame = null;
+
+    DefaultTableModel defaultModel;
+    private Vector<Customer> customers;
 
     /**
      * Constructor. Sets up all actions regarding the JFrame.
@@ -45,16 +48,19 @@ public class SingleCustomerExport {
         searchField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                searchCustomerNames();
+                searchCustomers();
             }
         });
 
-        customerList.addListSelectionListener(new ListSelectionListener() {
+        customerTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
-            public void valueChanged(ListSelectionEvent e) { SelectionChanged(); }
+            public void valueChanged(ListSelectionEvent e) {
+                SelectionChanged();
+            }
         });
 
-        SetMatchesList(Data.DB().GetCustomersName());
+        //SetMatchesList(Data.DB().GetCustomersName());
+        setThings();
         SelectionChanged();
     }
 
@@ -73,44 +79,66 @@ public class SingleCustomerExport {
     }
 
     /**
-     * Filter the customer list.
-     * @param customer Used for filtering.
+     * Searches the table based on the string passed to the function.
+     * @param searchString The string to search the entire table for.
      */
-    private void SetMatchesList(Vector<String> customer) {
-        customerList.clearSelection();
-        DefaultListModel<String> data = new DefaultListModel<String>();
-        for (String c: customer) data.addElement(c);
-        customerList.setModel(data);
+    private void searchTable(String searchString){
+        Vector<Customer> filtered = new Vector<>();
+        for (Customer c : customers) {
+            String searchThing = searchString.toLowerCase();
+            if(c.getName().toLowerCase().contains(searchThing) || c.getID().toLowerCase().contains(searchThing) ||
+                    c.getEmail().toLowerCase().contains(searchThing) ||
+                    c.getPhone().toLowerCase().contains(searchThing)){
+                filtered.addElement(c);
+            }
+        }
+
+        SetUpCustomerTable(filtered);
     }
 
-    /**
-     * Sets the list of customerNames.
-     */
-    private void setCustomerNames() {
-        customerNames = Data.DB().GetCustomersName();
-    }
 
     /**
      * Search filter for options to add to the customers pulls.
      */
-    private void searchCustomerNames() {
+    private void searchCustomers() {
         String text = searchField.getText();
         if (text.isEmpty()) {
-            setCustomerNames();
-            SetMatchesList(customerNames);
+            SetUpCustomerTable(Data.DB().GetCustomers());
             return;
         }
-        setCustomerNames();
-        Vector<String> filtered = new Vector<String>();
-        for (String c: customerNames) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
-        SetMatchesList(filtered);
+        searchTable(text);
+    }
+
+    /**
+     * Sets the customer table to display all customer information
+     * @param newCustomers The customer vector that contains all information to display.
+     */
+    private void SetUpCustomerTable(Vector<Customer> newCustomers){
+        String[] columns = {"ID", "Name", "Phone Number", "Email"};
+        defaultModel = new DefaultTableModel(columns, 0);
+        customerTable.setModel(defaultModel);
+        customerTable.setDefaultEditor(Object.class, null);
+
+        // Retrieve comics from the database and add them to the table model
+        customers = Data.DB().GetCustomers();
+        for(Customer c : newCustomers){
+            Object[] rowData = {c.getID(), c.getName(), c.getPhone(), c.getEmail()};
+            defaultModel.addRow(rowData);
+        }
+        customerTable.setAutoCreateRowSorter(true);
+    }
+
+    private void setThings() {
+        customers = Data.DB().GetCustomers();
+        SetUpCustomerTable(customers);
+        customerTable.setVisible(true);
     }
 
     /**
      * Disables export button if there is nothing selected.
      */
     private void SelectionChanged() {
-        boolean selected = !customerList.isSelectionEmpty();
+        boolean selected = !customerTable.getSelectionModel().isSelectionEmpty();
         if (!selected) {
             exportButton.setEnabled(false);
         }
@@ -131,8 +159,9 @@ public class SingleCustomerExport {
      * the data nicely for output.
      */
     private void onOk() {
-        String selectedItem = customerList.getSelectedValue().toString();
-        String customerID = Data.DB().getCustomerId(Data.Store(), selectedItem);
+        //String selectedItem = customerTable.getSelectedColumn(0);
+        //String customerID = Data.DB().getCustomerId(Data.Store(), selectedItem);
+        String customerID = customerTable.getModel().getValueAt(customerTable.getSelectedRow(), 0).toString();
         ResultSet data = Data.DB().singleCustomerExport(Data.Store(), customerID);
         boolean firstRun = true;
         Vector <ResultType> results = new Vector<>(0);
@@ -169,7 +198,8 @@ public class SingleCustomerExport {
 
         }
         new OutputFiles().Display(output);
-        customerList.clearSelection();
+        //customerList.clearSelection();
+        customerTable.clearSelection();
         SelectionChanged();
     }
 }
