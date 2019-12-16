@@ -187,15 +187,15 @@ public class SingleCustomerExport {
             //System.out.printf("Loop number: %s. Search Term: %s\n", i, results.get(i).getMatches());
             if (firstRun) {
                 //System.out.println(results.get(i).getCustomerName());
-                output += results.get(i).getCustomerName();
+                output += results.get(i).getCustomerName() + "\n";
                 firstRun = false;
             }
 
             Vector <String> titles = Data.DB().getCsvEntriesNames(Data.Store(), results.get(i).getMatches());
             int inside = titles.size();
             for (int j = 0; j < inside; j++) {
-                //System.out.printf("\tTitle: %s.\n\t\tQuantity: %s\n", titles.get(j), results.get(i).getQuantity());
-                output += "\tTitle: " + titles.get(i) + "\n\t\tQuantity: " + results.get(i).getQuantity() + "\n";
+                System.out.printf("\tTitle: %s.\n\t\tQuantity: %s\n", titles.get(j), results.get(i).getQuantity());
+                output += "\tTitle: " + titles.get(j) + "\n\t\tQuantity: " + results.get(i).getQuantity() + "\n";
             }
 
         }
