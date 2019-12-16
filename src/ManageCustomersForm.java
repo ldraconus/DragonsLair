@@ -9,7 +9,6 @@ import java.util.Vector;
  * Provides form and functionality to manage customers.
  */
 public class ManageCustomersForm {
-    private JList<String> customerList;
     private JButton addButton;
     private JButton editButton;
     private JButton deleteButton;
@@ -80,7 +79,7 @@ public class ManageCustomersForm {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 /* ignore */
-                //searchCustomers();
+                searchCustomers();
             }
         });
 
@@ -109,22 +108,36 @@ public class ManageCustomersForm {
         });
     }
 
+
     /**
-     * Search filter
+     * Search filter for options to add to the customers pulls.
      */
-    /*
     private void searchCustomers() {
         String text = searchTextField.getText();
         if (text.isEmpty()) {
-            SetUpCustomerTable(customers);
-            SetContext();
+            SetUpCustomerTable(Data.DB().GetCustomers());
             return;
-        }//TODO make search work with JTable
-        Vector<String> filtered = new Vector<String>();
-        for (Customer c: customers) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
-        SetCustomerList(filtered);
-        SetContext();
-    }*/
+        }
+        searchTable(text);
+    }
+
+    /**
+     * Searches the table based on the string passed to the function.
+     * @param searchString The string to search the entire table for.
+     */
+    private void searchTable(String searchString){
+        Vector<Customer> filtered = new Vector<>();
+        for (Customer c : customers) {
+            String searchThing = searchString.toLowerCase();
+            if(c.getName().toLowerCase().contains(searchThing) || c.getID().toLowerCase().contains(searchThing) ||
+                    c.getEmail().toLowerCase().contains(searchThing) ||
+                    c.getPhone().toLowerCase().contains(searchThing)){
+                filtered.addElement(c);
+            }
+        }
+
+        SetUpCustomerTable(filtered);
+    }
 
     /**
      * Enable or disable add, delete, and edit.
@@ -136,22 +149,16 @@ public class ManageCustomersForm {
     }
 
     /**
-     * Filter the customer list.
-     * @param cust Used for filtering.
+     * Sets the customer table to contain all information.
+     * @param newCustomers the vector of customer objects to display.
      */
-    private void SetCustomerList(Vector<String> cust) {
-        customerList.clearSelection();
-        DefaultListModel<String> data = new DefaultListModel<String>();
-        for (String c: cust) data.addElement(c);
-        customerList.setModel(data);
-    }
-
     private void SetUpCustomerTable(Vector<Customer> newCustomers){
         String[] columns = {"ID","Name", "Phone Number", "Email"};
         defaultModel = new DefaultTableModel(columns, 0);
         customerTable.setModel(defaultModel);
+        customerTable.setDefaultEditor(Object.class, null);
 
-        // Retrieve comics from the database and add them to the table model
+        // Retrieve customers from the database and add them to the table model
         customers = Data.DB().GetCustomers();
         for(Customer c : newCustomers){
             Object[] rowData = {c.getID(), c.getName(), c.getPhone(), c.getEmail()};
@@ -163,7 +170,6 @@ public class ManageCustomersForm {
      * Get and set the customer list.
      */
     private void Open() {
-        //customerList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         customers = Data.DB().GetCustomers();
         SetUpCustomerTable(customers);
         customerTable.setVisible(true);
@@ -207,13 +213,17 @@ public class ManageCustomersForm {
             String newPhone = EditCustomer.Phone();
             String newEmail = EditCustomer.EMail();
             if (newName.equals(name) && newPhone.equals(phone) && newEmail.equals(email)) return;
-            if (newName.isEmpty()) return;
+            if (newName.isEmpty() || newPhone.isEmpty() && newEmail.isEmpty()) return;
+            if (Data.DB().CustomerExists(Data.Store(), newName, newEmail, newPhone)) return;
             Data.DB().UpdateCustomer(Data.Store(), id, newName, newEmail, newPhone);
             searchTextField.setText("");
             customers = Data.DB().GetCustomers();
             SetUpCustomerTable(customers);
+            customerTable.clearSelection();
             SetContext();
         }
+        customerTable.clearSelection();
+        SetContext();
     }
 
     /**

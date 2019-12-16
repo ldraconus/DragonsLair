@@ -1632,7 +1632,7 @@ public class DB {
     }
 
     /**
-     * Grabs all the information to do exporting for all customer.
+     * Grabs all the information to do exporting for all customers.
      * @param store: The store being used
      * @return
      */
@@ -1640,8 +1640,24 @@ public class DB {
 
         db.ExecutePrepared("use " + store);
         ResultSet theData = db.ExecutePrepared("select customer.name, customer.id, matches, pull_List.number " +
-                "from customer, pull_list, searchTerms " +
-                "where searchTerms.id = searchTerm_id and customer_id = customer.id");
+                "from customer, pull_list, searchTerms where" +
+                "searchTerms.id = searchTerm_id and customer_id = customer.id order by customer_id");
+
+        return theData;
+    }
+
+    /**
+     * Grabs all the information for exporting a single customers pull requests.
+     * @param store Name of the store to use.
+     * @param customerID Unique ID number for the customer to use.
+     * @return ResultSet containing customerName, customerID, matches, and pull quantity.
+     */
+    public ResultSet singleCustomerExport(String store, String customerID){
+
+        db.ExecutePrepared("use " + store);
+        ResultSet theData = db.ExecutePrepared("select customer.name, customer.id, matches, pull_List.number " +
+                "from customer, pull_list, searchTerms where " +
+                "searchTerms.id = searchTerm_id and customer_id = customer.id and customer_id = ?", customerID);
 
         return theData;
     }
