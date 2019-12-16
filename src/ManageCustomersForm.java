@@ -108,18 +108,35 @@ public class ManageCustomersForm {
         });
     }
 
+
     /**
-     * Search filter
-     * Creates a vector of customers based on what is in the search bar
-     * then passes that vector to setUpCustomerTable
+     * Search filter for options to add to the customers pulls.
      */
     private void searchCustomers() {
         String text = searchTextField.getText();
         if (text.isEmpty()) {
-            SetUpCustomerTable(customers);
-            SetContext();
+            SetUpCustomerTable(Data.DB().GetCustomers());
             return;
         }
+        searchTable(text);
+    }
+
+    /**
+     * Searches the table based on the string passed to the function.
+     * @param searchString The string to search the entire table for.
+     */
+    private void searchTable(String searchString){
+        Vector<Customer> filtered = new Vector<>();
+        for (Customer c : customers) {
+            String searchThing = searchString.toLowerCase();
+            if(c.getName().toLowerCase().contains(searchThing) || c.getID().toLowerCase().contains(searchThing) ||
+                    c.getEmail().toLowerCase().contains(searchThing) ||
+                    c.getPhone().toLowerCase().contains(searchThing)){
+                filtered.addElement(c);
+            }
+        }
+
+        SetUpCustomerTable(filtered);
         Vector<Customer> filtered = new Vector<>();
         for (Customer c: customers)
             if (c.getName().toLowerCase().contains(text.toLowerCase())) {
@@ -139,12 +156,14 @@ public class ManageCustomersForm {
     }
 
     /**
-     *  Creates a JTable with the paramater newCustomers
+     * Sets the customer table to contain all information.
+     * @param newCustomers the vector of customer objects to display.
      */
     private void SetUpCustomerTable(Vector<Customer> newCustomers){
         String[] columns = {"ID","Name", "Phone Number", "Email"};
         defaultModel = new DefaultTableModel(columns, 0);
         customerTable.setModel(defaultModel);
+        customerTable.setDefaultEditor(Object.class, null);
 
         // Retrieve customers from the database and add them to the table model
         customers = Data.DB().GetCustomers();
@@ -207,8 +226,11 @@ public class ManageCustomersForm {
             searchTextField.setText("");
             customers = Data.DB().GetCustomers();
             SetUpCustomerTable(customers);
+            customerTable.clearSelection();
             SetContext();
         }
+        customerTable.clearSelection();
+        SetContext();
     }
 
     /**

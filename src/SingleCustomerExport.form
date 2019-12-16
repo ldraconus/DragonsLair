@@ -43,7 +43,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="4b1fa" class="javax.swing.JList" binding="customerList">
+          <component id="49d73" class="javax.swing.JTable" binding="customerTable">
             <constraints/>
             <properties/>
           </component>
