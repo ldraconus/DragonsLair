@@ -200,7 +200,6 @@ public class SingleCustomerExport {
 
         }
         new OutputFiles().Display(output);
-        //customerList.clearSelection();
         customerTable.clearSelection();
         SelectionChanged();
     }
