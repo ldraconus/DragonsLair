@@ -8,6 +8,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
 
+/**
+ * This form is for managing comic books in the database.
+ */
 public class ManageComicsForm {
     private JPanel manageComicsPanel;
     private JTextField searchTextField;
@@ -22,10 +25,16 @@ public class ManageComicsForm {
     DefaultTableModel defaultModel;
     private Vector<Comic> comics;
 
+    /**
+     * Dispose of the JFrame.
+     */
     public static void Dispose() { // dispose sub windows
         if (frame != null) frame.dispose();
     }
 
+    /**
+     * Create a new JFrame and add the initial UI components.
+     */
     public static void Display() {
         if (frame == null) {
             frame = new JFrame("Manage Comics");
@@ -37,6 +46,10 @@ public class ManageComicsForm {
         frame.setVisible(true);
     }
 
+    /**
+     * Class constructor.
+     * Setup action listeners for UI components.
+     */
     public ManageComicsForm() {
         frame.addWindowListener(new WindowAdapter() {
             public void windowOpened(WindowEvent we) { Open(); }
@@ -98,7 +111,7 @@ public class ManageComicsForm {
     }
 
     /**
-     * Get and set the customer list.
+     * Retrieves the CSV entries from the database and sets up the comic table.
      */
     private void Open() {
         // Retrieve comics from the database and add them to the table model
@@ -111,7 +124,7 @@ public class ManageComicsForm {
     }
 
     /**
-     * Enable or disable add, delete, and edit.
+     * Enable or disable the add, delete, and edit buttons.
      */
     private void SetContext() {
         addButton.setEnabled(true);
@@ -120,7 +133,7 @@ public class ManageComicsForm {
     }
 
     /**
-     * Filter comics.
+     * Filter comics in the table.
      */
     private void searchComics() {
         String text = searchTextField.getText();
@@ -139,6 +152,11 @@ public class ManageComicsForm {
         SetUpComicTable(filtered);
     }
 
+    /**
+     * Sets up the comicTable with the vector of comics passed
+     * in through the parameters
+     * @param newComics Vector of comics
+     */
     private void SetUpComicTable(Vector<Comic> newComics){
         String[] columns = {"Comic name","Diamond Code"};
         defaultModel = new DefaultTableModel(columns, 0);
@@ -153,7 +171,7 @@ public class ManageComicsForm {
     }
 
     /**
-     * Delete a comic to the database and JTable.
+     * Delete a comic from the database and JTable.
      */
     private void Delete() {
         if(comicTable.getSelectionModel().isSelectionEmpty())
@@ -209,6 +227,9 @@ public class ManageComicsForm {
         }
     }
 
+    /**
+     * Call the dispose method.
+     */
     private void Done() {
         Dispose();
     }

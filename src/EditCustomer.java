@@ -75,15 +75,6 @@ public class EditCustomer extends JDialog {
         });
 
         /**
-         * Add action listener to pull list button.
-         */
-        pullListButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onPullList();
-            }
-        });
-
-        /**
          * Add window listerner to call onCancel when the window is closed.
          */
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -147,13 +138,5 @@ public class EditCustomer extends JDialog {
     private void onCancel() {
         ok = false;
         dispose();
-    }
-
-    /**
-     * Opens the pull list editing window. Not yet complete.
-     */
-    private void onPullList() {
-        new PullLIst(customerNameField.getText(), emailAddressField.getText(), phoneNumberField.getText()).Display(customerNameField.getText(), emailAddressField.getText(), phoneNumberField.getText());
-        // bring up the pull list editing dialog
     }
 }

@@ -8,7 +8,7 @@ import java.util.Vector;
 /**
  * Manage customer pull list.
  */
-public class PullLIst extends JDialog {
+public class PullLIst {
     private Vector<String> customerPullsList;
     private Vector<String> possiblePulls;
     private JPanel contentPane;
@@ -29,6 +29,27 @@ public class PullLIst extends JDialog {
     private static JFrame frame = null;
 
     /**
+     * Dispose of the JFrame.
+     */
+    public static void Dispose() { // dispose sub windows
+        if (frame != null) frame.dispose();
+    }
+
+    /**
+     * Create a new JFrame and add the initial UI components.
+     */
+    public static void Display(String name1, String email1, String phone1) {
+        if (frame == null) {
+            frame = new JFrame("Dragon's Lair Manage Pull List");
+            frame.setContentPane(new PullLIst(name1, email1, phone1).contentPane);
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+        }
+        frame.setVisible(true);
+    }
+
+    /**
      * Class constructor.
      * Setup action listeners for UI components.
      */
@@ -36,11 +57,6 @@ public class PullLIst extends JDialog {
         name = nameIn;
         email = emailIn;
         phone = phoneIn;
-
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonCancel);
-
 
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -55,7 +71,6 @@ public class PullLIst extends JDialog {
             }
         });
 
-
         customerPulls.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) { pullListSelectionChanged(); }
@@ -69,12 +84,13 @@ public class PullLIst extends JDialog {
         });
 
         // call onCancel() when cross is clicked
+        /*
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
             }
-        });
+        });*/
 
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(new ActionListener() {
@@ -128,20 +144,10 @@ public class PullLIst extends JDialog {
         });
 
         selectionChanged();
-    }
 
-    /**
-     * Create a new JFrame and add the initial UI components.
-     */
-    public void Display(String name1, String email1, String phone1) {
-        if (frame == null) {
-            frame = new JFrame("Dragon's Lair Manage Pull List");
-            frame.setContentPane(new PullLIst(name1, email1, phone1).contentPane);
-            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-        }
-        frame.setVisible(true);
+        //setLocationRelativeTo(null);
+        //pack();
+        //setVisible(true);
     }
 
     /**
@@ -149,7 +155,7 @@ public class PullLIst extends JDialog {
      */
     private void onOK() {
         // add your code here
-        dispose();
+        //dispose();
     }
 
     /**
@@ -164,7 +170,7 @@ public class PullLIst extends JDialog {
      * Add Search term window.
      */
     private void addItem() {
-        new AddSearchTerm().Display();
+        new AddSearchTerm();
         SetMatchesList(Data.DB().getSearchTermsNames());
         setPulls();
         searchPullOptions();
@@ -256,13 +262,6 @@ public class PullLIst extends JDialog {
         Vector<String> filtered = new Vector<>();
         for (String c: customerPullsList) if (c.toLowerCase().contains(text.toLowerCase())) filtered.addElement(c);
         SetPullsList(filtered);
-    }
-
-    /**
-     * Dispose of the JFrame.
-     */
-    public static void Dispose() { // dispose sub windows
-        frame.dispose();
     }
 
     /**
