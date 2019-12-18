@@ -153,6 +153,7 @@ public class ManageCustomersForm {
         addButton.setEnabled(true);
         deleteButton.setEnabled(!customerTable.getSelectionModel().isSelectionEmpty());
         editButton.setEnabled(!customerTable.getSelectionModel().isSelectionEmpty());
+        pullListButton.setEnabled(!customerTable.getSelectionModel().isSelectionEmpty());
     }
 
     /**
@@ -266,6 +267,9 @@ public class ManageCustomersForm {
         SetContext();
     }
 
+    /**
+     * Displays pull list window.
+     */
     private void DisplayPullListForm(){
         int selectedRow = customerTable.getSelectedRow();
         String customerName = customerTable.getModel().getValueAt(selectedRow, 1).toString();
