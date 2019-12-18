@@ -718,7 +718,7 @@ public class DB {
     }
 
     /**
-     *
+     * Inserts values into the csv dates table.
      * @param date The date of a particular csv entry
      * @param store The store being used.
      */
@@ -746,6 +746,13 @@ public class DB {
     }
 
     // TODO: Resolve SQLException
+
+    /**
+     * Gets a csv date corresponding to a csv date id.
+     * @param store Store to search.
+     * @param id id of the csv date to get
+     * @return a string of the date.
+     */
     public String getCsvDate(String store, String id){
         String csvDate = "";
         db.ExecuteStatement("use " + store);
@@ -763,6 +770,10 @@ public class DB {
         return csvDate;
     }
 
+    /**
+     * Gets all dates from the csv dates tables.
+     * @return A vector containing formatted dates from the csv dates table.
+     */
     public Vector<String> getCsvDates(){
         Vector<String> csvDates = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
@@ -832,6 +843,12 @@ public class DB {
         return csvEntries;
     }
 
+    /**
+     * Gets a comic corresponding to a diamond code.
+     * @param store The store to search.
+     * @param diamondCode Diamond code to get the information for.
+     * @return A comic containing all the information for the selected item.
+     */
     public Comic getCsvEntry(String store, String diamondCode){
         Comic comic = new Comic("", "");
         db.ExecuteStatement("use " + store);
@@ -922,6 +939,10 @@ public class DB {
         return csvEntries;
     }
 
+    /**
+     * Gets all search term names.
+     * @return A vector containing all names in the search term table.
+     */
     public Vector<String> getSearchTermsNames() {
         Vector<String> csvEntries = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
@@ -939,6 +960,10 @@ public class DB {
         return csvEntries;
     }
 
+    /**
+     * Gets all search terms for non book items.
+     * @return A vector containing all titles in the search term table for non book items.
+     */
     public Vector<String> getSearchTermsNonBook() {
         Vector<String> csvEntries = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
@@ -956,6 +981,10 @@ public class DB {
         return csvEntries;
     }
 
+    /**
+     * Gets all search terms for a specific diamond code.
+     * @return A vector containing all diamond codes in the search terms table.
+     */
     public Vector<String> getSearchTermsDiamond() {
         Vector<String> csvEntries = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
@@ -973,6 +1002,10 @@ public class DB {
         return csvEntries;
     }
 
+    /**
+     * Gets the issue numbers for all search terms whose issue number is not null.
+     * @return Vector of issue numbers corresponding to the search terms.
+     */
     public Vector<String> getSearchTermsIssue() {
         Vector<String> csvEntries = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
@@ -1003,6 +1036,10 @@ public class DB {
         return csvEntries;
     }
 
+    /**
+     * Gets all search terms that are for graphic novels.
+     * @return A vector of titles of the search terms that are for graphic novels.
+     */
     public Vector<String> getSearchTermsGraphic() {
         Vector<String> csvEntries = new Vector<>();
         db.ExecuteStatement("use " + Data.Store());
@@ -1055,6 +1092,13 @@ public class DB {
         return csvEntries;
     }
 
+    /**
+     * Gets the customer id for the given information
+     * @param name Name of the customer
+     * @param phone Phone number of the customer
+     * @param email Email of the customer
+     * @return The unique ID for the customer whose information matches the parameters.
+     */
     public String getCustomerID(String name, String phone, String email) {
         String customerID = "";
         db.ExecuteStatement("use " + Data.Store());
@@ -1089,6 +1133,13 @@ public class DB {
         db.ExecuteData("delete from csvEntries where diamond=?", diamond);
     }
 
+    /**
+     * Updates a csv entry to new information passed in.
+     * @param store Store to update the entry for.
+     * @param comic Comic object containing the new information.
+     * @param csv_id ID of the csv entry
+     * @param ogDiamondCode The original diamond code of the comic to update.
+     */
     public void updateCsvEntry(String store, Comic comic, String csv_id, String ogDiamondCode) {
         db.ExecuteStatement("use " + store);
         db.ExecuteData("update csvEntries set title=?, issue=?, graphicNovel=?, nonBook=?, diamond=?," +
@@ -1219,6 +1270,12 @@ public class DB {
         db.ExecuteData("delete from searchTerms where name = ?", name);
     }
 
+    /**
+     * Get search term id is used to get the unique id number of a search term given its name.
+     * @param store Store to check for.
+     * @param name Name of the search term to get the ID.
+     * @return ID corresponding to the search term name.
+     */
     private String getSearchTermID(String store, String name) {
         db.ExecutePrepared("use " + store);
         ResultSet data = db.ExecutePrepared("select * from searchTerms where name = ?", name);
