@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.util.Vector;
 
-public class AddSearchTerm extends JFrame{
+public class AddSearchTerm extends JDialog{
     private JTextField diamondCodeField;
     private JTextField issueField;
     private JTextField displayNameField;
@@ -13,9 +13,10 @@ public class AddSearchTerm extends JFrame{
     private JPanel contentPane;
     private JTextField searchField;
 
-    private static JFrame frame = null;
-
     public AddSearchTerm() {
+        setContentPane(contentPane);
+        setModal(true);
+        getRootPane().setDefaultButton(okButton);
 
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -35,15 +36,19 @@ public class AddSearchTerm extends JFrame{
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+        setLocationRelativeTo(null);
+        pack();
+        setVisible(true);
     }
 
     private void onCancel() {
-        if (frame != null) { frame.dispose(); }
+        dispose();
     }
 
     /**
      * Create a new JFrame and add the initial UI components.
      */
+    /*
     public void Display() {
         if (frame == null) {
             frame = new JFrame("Add Pull Terms");
@@ -53,7 +58,7 @@ public class AddSearchTerm extends JFrame{
             frame.setLocationRelativeTo(null);
         }
         frame.setVisible(true);
-    }
+    }*/
 
     private void onOk() {
         String displayName = displayNameField.getText();
@@ -65,7 +70,7 @@ public class AddSearchTerm extends JFrame{
 
         if (displayName.compareTo("") == 0) {
             String message = "Please enter a display name";
-            JOptionPane.showMessageDialog(null, message);
+            JOptionPane.showMessageDialog(this.contentPane, message);
             return;
         }
 
@@ -83,7 +88,7 @@ public class AddSearchTerm extends JFrame{
         }*/
 
         Data.DB().insertSearchTerms(Data.Store(), displayName, diamondName, issueName,graphicNovel, nonBook, matchTerm);
-        onCancel();
+        dispose();
     }
 
     private boolean checkExtra(String first, String second, String graphic, String other) {
