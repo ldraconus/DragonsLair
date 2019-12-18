@@ -16,6 +16,7 @@ public class ManageCustomersForm {
     private JTextField searchTextField;
     private JPanel manageCustomersPanel;
     private JTable customerTable;
+    private JButton pullListButton;
 
     private static JFrame frame = null;
 
@@ -35,7 +36,7 @@ public class ManageCustomersForm {
     public static void Display() {
         if (frame == null) {
             frame = new JFrame("Dragon's Lair Manage Customers");
-            frame.setContentPane(new ManageCustomersForm().manageCustomersPanel);
+                            frame.setContentPane(new ManageCustomersForm().manageCustomersPanel);
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             frame.pack();
             frame.setLocationRelativeTo(null);
@@ -105,6 +106,12 @@ public class ManageCustomersForm {
         doneButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) { Done(); }
+        });
+        pullListButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DisplayPullListForm();
+            }
         });
     }
 
@@ -257,5 +264,13 @@ public class ManageCustomersForm {
      */
     private void SelectionChanged() {
         SetContext();
+    }
+
+    private void DisplayPullListForm(){
+        int selectedRow = customerTable.getSelectedRow();
+        String customerName = customerTable.getModel().getValueAt(selectedRow, 1).toString();
+        String email = customerTable.getModel().getValueAt(selectedRow, 3).toString();
+        String phone = customerTable.getModel().getValueAt(selectedRow, 2).toString();
+        PullLIst.Display(customerName, email, phone);
     }
 }
