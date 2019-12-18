@@ -1662,7 +1662,38 @@ public class DB {
         return theData;
     }
 
+    /**
+     * This is case 1: When a customer specifies a specific comic that exists in the csvEntries.
+     * @param store: The store we are using.
+     * @return
+     */
+    public ResultSet specificCsvToCustomer(String store){
+        db.ExecutePrepared("use " + store);
+        ResultSet data = db.ExecutePrepared("select customer.name, title " +
+                    "from customer, csvEntries, searchTerms, pull_list " +
+                    "where customer.id = customer_id and searchTerms.id = searchTerm_id and searchTerms.name = title");
 
+        return data;
+    }
+
+    /**
+     * This is case 2: When a searchTerm is All Something, we would provide "Something" as the search parameter.
+     * I think we could derive the search argument by grabbing the matches column associated with All Something
+     * if that is how the database is actually set up. There is a method called getSearchTermMatch which returns the
+     * match name given a searchTerm id.
+     * @param store: The store the database is associated with.
+     * @param search: The search string we use to associate the csvEntries corresponding to an All Something.
+     * @return
+     */
+    public ResultSet allCsvToCustomer(String store, String search){
+        db.ExecutePrepared("use " + store);
+        String actualSearch = "%" + search + "%";
+        ResultSet data = db.ExecutePrepared("select title, customer.name " +
+                    "from customer, csvEntries, searchTerms, pull_list " +
+                    "where customer.id = customer_id and searchTerms.id = searchTerm_id and title like ? and matches like ?", actualSearch, actualSearch);
+
+        return data;
+    }
 
     /****************************************************************************************************
      * This is the end of my version of the pull processing. This little barrier can be
