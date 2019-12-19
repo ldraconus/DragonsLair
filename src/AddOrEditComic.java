@@ -2,6 +2,9 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.util.Vector;
 
+/**
+ * Window used when trying to add or edit a comic.
+ */
 public class AddOrEditComic extends JDialog {
     private JPanel contentPane;
     private JTextField titleTextField;
@@ -21,20 +24,57 @@ public class AddOrEditComic extends JDialog {
     private static String issue;
     private static String csvId;
 
+    /**
+     * Checking to see if they are finished.
+     * @return True if finished, false otherwise.
+     */
     public static boolean Finished() { return finished; }
 
+    /**
+     * Get comic title.
+     * @return Comic title.
+     */
     public static String ComicTitle() { return comicTitle; }
 
+    /**
+     * Get diamond code.
+     * @return Diamond code.
+     */
     public static String DiamondCode() { return diamondCode; }
 
+    /**
+     * Get graphic novel status.
+     * @return graphic novel status.
+     */
     public static String GraphicNovel() { return graphicNovel; }
 
+    /**
+     * Get non book status.
+     * @return non book status.
+     */
     public static String NonBook() { return nonBook; }
 
+    /**
+     * Get issue number.
+     * @return Issue number.
+     */
     public static String Issue() { return issue; }
 
+    /**
+     * Get csv id.
+     * @return CSV ID
+     */
     public static String CsvId() { return csvId; }
 
+    /**
+     * Sets up the window with the proper information prepopulated.
+     * @param title Title of comic.
+     * @param dCode Diamond code of comic.
+     * @param gNovel Graphic novel status.
+     * @param nBook Non book status.
+     * @param iss Issue number.
+     * @param date Date to add to.
+     */
     public AddOrEditComic(String title, String dCode, String gNovel, String nBook, String iss, String date){
         setContentPane(contentPane);
         setModal(true);
@@ -77,6 +117,9 @@ public class AddOrEditComic extends JDialog {
         setVisible(true);
     }
 
+    /**
+     * Saves all the information in the window. Finished set to true.
+     */
     private void Save() {
         comicTitle = titleTextField.getText();
         diamondCode = diamondTextField.getText();
@@ -98,6 +141,9 @@ public class AddOrEditComic extends JDialog {
         dispose();
     }
 
+    /**
+     * Set finished to false, get rid of window.
+     */
     private void Cancel() {
         finished = false;
         dispose();

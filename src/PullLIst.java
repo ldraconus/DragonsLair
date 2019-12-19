@@ -300,6 +300,9 @@ public class PullLIst {
         }
     }
 
+    /**
+     * Disables the add to pull button if the quantity field is empty.
+     */
     private void quantityChanged() {
         String fieldValue = quantityField.getText();
         if (fieldValue.isEmpty()) {
@@ -310,6 +313,9 @@ public class PullLIst {
         }
     }
 
+    /**
+     * Deletes the selected item from the search terms table.
+     */
     private void removeFromSearchTerms() {
        String selected = inInventory.getSelectedValue().toString();
        Data.DB().deleteSearchTerms(Data.Store(), selected);

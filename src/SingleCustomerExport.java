@@ -126,6 +126,9 @@ public class SingleCustomerExport {
         customerTable.setAutoCreateRowSorter(true);
     }
 
+    /**
+     * Updates the customer table.
+     */
     private void setThings() {
         customers = Data.DB().GetCustomers();
         SetUpCustomerTable(customers);

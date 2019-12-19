@@ -8,6 +8,10 @@ import java.awt.event.KeyEvent;
 import java.util.Iterator;
 import java.util.Vector;
 
+/**
+ * This is the window that opens when you want to export everybody that gets a single comic.
+ * Note: This window does not currently work.
+ */
 public class SingleComicExport extends JDialog{
     private Vector<String> possiblePulls;
     private JPanel contentPane;
@@ -18,6 +22,9 @@ public class SingleComicExport extends JDialog{
 
     private static JFrame frame = null;
 
+    /**
+     * Sets up all information for the window.
+     */
     public SingleComicExport() {
 
         cancelButton.addActionListener(new ActionListener() {
@@ -98,6 +105,9 @@ public class SingleComicExport extends JDialog{
         SetMatchesList(filtered);
     }
 
+    /**
+     * Disables the ok button if nothing is selected.
+     */
     private void SelectionChanged() {
         boolean selected = !inInventory.isSelectionEmpty();
         if (!selected) {
@@ -108,6 +118,9 @@ public class SingleComicExport extends JDialog{
         }
     }
 
+    /**
+     * Runs when ok button is pressed. Validates selection before trying to save it to file.
+     */
     private void onOk() {
         String selectedItem = inInventory.getSelectedValue().toString();
         //System.out.println(selectedItem);
