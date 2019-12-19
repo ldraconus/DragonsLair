@@ -1,7 +1,9 @@
 import javax.swing.*;
 import java.awt.event.*;
-import java.util.Vector;
 
+/**
+ * Add search term window. Used for creating pull lists.
+ */
 public class AddSearchTerm extends JDialog{
     private JTextField diamondCodeField;
     private JTextField issueField;
@@ -13,6 +15,9 @@ public class AddSearchTerm extends JDialog{
     private JPanel contentPane;
     private JTextField searchField;
 
+    /**
+     * Sets up all actions related to window.
+     */
     public AddSearchTerm() {
         setContentPane(contentPane);
         setModal(true);
@@ -41,6 +46,9 @@ public class AddSearchTerm extends JDialog{
         setVisible(true);
     }
 
+    /**
+     * Dispose window when closed.
+     */
     private void onCancel() {
         dispose();
     }
@@ -60,6 +68,9 @@ public class AddSearchTerm extends JDialog{
         frame.setVisible(true);
     }*/
 
+    /**
+     * Checks all values when ok button is pressed, then adds the term.
+     */
     private void onOk() {
         String displayName = displayNameField.getText();
         String diamondName = diamondCodeField.getText();
@@ -91,6 +102,14 @@ public class AddSearchTerm extends JDialog{
         dispose();
     }
 
+    /**
+     * Checks strings to see if more than one is filled out.
+     * @param first Diamond code.
+     * @param second Issue number.
+     * @param graphic Graphic field.
+     * @param other Nonbook field.
+     * @return True if only one string is not null, false otherwise.
+     */
     private boolean checkExtra(String first, String second, String graphic, String other) {
         int nullCount = 0;
 

@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.event.*;
 
+/**
+ * This window is what has all the options for printing reports.
+ */
 public class PrintReports {
     private JPanel contentPanel;
     private JButton singleComic;
@@ -11,6 +14,9 @@ public class PrintReports {
 
     private static JFrame frame = null;
 
+    /**
+     * Sets up all information for the print reports window.
+     */
     public PrintReports() {
         singleComic.addActionListener(new ActionListener() {
             @Override
@@ -92,18 +98,30 @@ public class PrintReports {
         frame.setVisible(true);
     }
 
+    /**
+     * Open single comic export window.
+     */
     private void singleComic() {
-        new SingleComicExport().Display();
+        //new SingleComicExport().Display();
     }
 
+    /**
+     * Open single customer export window.
+     */
     private void singleCustomer() {
         new SingleCustomerExport().Display();
     }
 
+    /**
+     * Open new release export window.
+     */
     private void newReleases() {
 
     }
 
+    /**
+     * Open export all titles window.
+     */
     private void allTitles() {
 
     }

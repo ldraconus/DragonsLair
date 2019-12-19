@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * Output Files is used to create a text file. Pass it a string and it will handle the rest.
+ */
 public class OutputFiles {
     private JPanel SavePanel;
     private JFileChooser SaveLocation;
@@ -16,6 +19,10 @@ public class OutputFiles {
 
     private static JFrame frame = null;
 
+    /**
+     * Makes the save dialog window, restricts type to only .txt files.
+     * @param content What to save to the file.
+     */
     private void saveWindow(String content) {
         SaveLocation.setDialogTitle("Specify a file to save");
         SaveLocation.setAcceptAllFileFilterUsed(false);
@@ -31,16 +38,17 @@ public class OutputFiles {
         }
     }
 
+    /**
+     * Actually writes to the the file.
+     * @param location Where to save to.
+     * @param content What to save to the file.
+     */
     private void writeFile(String location, String content) {
         try {
             Files.write(Paths.get(location), content.getBytes());
         } catch (IOException io) {
             System.err.println(io.getMessage());
         }
-    }
-
-    public File getFileToSave() {
-        return fileToSave;
     }
 
     /**
@@ -50,6 +58,9 @@ public class OutputFiles {
         saveWindow(content);
     }
 
+    /**
+     * Sets up window listeners.
+     */
     public OutputFiles() {
         SavePanel.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
